@@ -9,38 +9,246 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReferralRouteImport } from './routes/referral'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as FixRouteImport } from './routes/fix'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminPremiumRouteImport } from './routes/admin.premium'
+import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
+import { Route as AdminGmailRouteImport } from './routes/admin.gmail'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
 
+const ReferralRoute = ReferralRouteImport.update({
+  id: '/referral',
+  path: '/referral',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FixRoute = FixRouteImport.update({
+  id: '/fix',
+  path: '/fix',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTemplatesRoute = AdminTemplatesRouteImport.update({
+  id: '/admin/templates',
+  path: '/admin/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPremiumRoute = AdminPremiumRouteImport.update({
+  id: '/admin/premium',
+  path: '/admin/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOwnerRoute = AdminOwnerRouteImport.update({
+  id: '/admin/owner',
+  path: '/admin/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGmailRoute = AdminGmailRouteImport.update({
+  id: '/admin/gmail',
+  path: '/admin/gmail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBroadcastRoute = AdminBroadcastRouteImport.update({
+  id: '/admin/broadcast',
+  path: '/admin/broadcast',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/fix': typeof FixRoute
+  '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/profil': typeof ProfilRoute
+  '/referral': typeof ReferralRoute
+  '/admin/broadcast': typeof AdminBroadcastRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/gmail': typeof AdminGmailRoute
+  '/admin/owner': typeof AdminOwnerRoute
+  '/admin/premium': typeof AdminPremiumRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/templates': typeof AdminTemplatesRoute
+  '/admin/users': typeof AdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/fix': typeof FixRoute
+  '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/profil': typeof ProfilRoute
+  '/referral': typeof ReferralRoute
+  '/admin/broadcast': typeof AdminBroadcastRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/gmail': typeof AdminGmailRoute
+  '/admin/owner': typeof AdminOwnerRoute
+  '/admin/premium': typeof AdminPremiumRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/templates': typeof AdminTemplatesRoute
+  '/admin/users': typeof AdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/fix': typeof FixRoute
+  '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/profil': typeof ProfilRoute
+  '/referral': typeof ReferralRoute
+  '/admin/broadcast': typeof AdminBroadcastRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/gmail': typeof AdminGmailRoute
+  '/admin/owner': typeof AdminOwnerRoute
+  '/admin/premium': typeof AdminPremiumRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/templates': typeof AdminTemplatesRoute
+  '/admin/users': typeof AdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/fix'
+    | '/history'
+    | '/login'
+    | '/profil'
+    | '/referral'
+    | '/admin/broadcast'
+    | '/admin/dashboard'
+    | '/admin/gmail'
+    | '/admin/owner'
+    | '/admin/premium'
+    | '/admin/settings'
+    | '/admin/templates'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/fix'
+    | '/history'
+    | '/login'
+    | '/profil'
+    | '/referral'
+    | '/admin/broadcast'
+    | '/admin/dashboard'
+    | '/admin/gmail'
+    | '/admin/owner'
+    | '/admin/premium'
+    | '/admin/settings'
+    | '/admin/templates'
+    | '/admin/users'
+  id:
+    | '__root__'
+    | '/'
+    | '/fix'
+    | '/history'
+    | '/login'
+    | '/profil'
+    | '/referral'
+    | '/admin/broadcast'
+    | '/admin/dashboard'
+    | '/admin/gmail'
+    | '/admin/owner'
+    | '/admin/premium'
+    | '/admin/settings'
+    | '/admin/templates'
+    | '/admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FixRoute: typeof FixRoute
+  HistoryRoute: typeof HistoryRoute
+  LoginRoute: typeof LoginRoute
+  ProfilRoute: typeof ProfilRoute
+  ReferralRoute: typeof ReferralRoute
+  AdminBroadcastRoute: typeof AdminBroadcastRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminGmailRoute: typeof AdminGmailRoute
+  AdminOwnerRoute: typeof AdminOwnerRoute
+  AdminPremiumRoute: typeof AdminPremiumRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTemplatesRoute: typeof AdminTemplatesRoute
+  AdminUsersRoute: typeof AdminUsersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/referral': {
+      id: '/referral'
+      path: '/referral'
+      fullPath: '/referral'
+      preLoaderRoute: typeof ReferralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fix': {
+      id: '/fix'
+      path: '/fix'
+      fullPath: '/fix'
+      preLoaderRoute: typeof FixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +256,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/templates': {
+      id: '/admin/templates'
+      path: '/admin/templates'
+      fullPath: '/admin/templates'
+      preLoaderRoute: typeof AdminTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/premium': {
+      id: '/admin/premium'
+      path: '/admin/premium'
+      fullPath: '/admin/premium'
+      preLoaderRoute: typeof AdminPremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/owner': {
+      id: '/admin/owner'
+      path: '/admin/owner'
+      fullPath: '/admin/owner'
+      preLoaderRoute: typeof AdminOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/gmail': {
+      id: '/admin/gmail'
+      path: '/admin/gmail'
+      fullPath: '/admin/gmail'
+      preLoaderRoute: typeof AdminGmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/broadcast': {
+      id: '/admin/broadcast'
+      path: '/admin/broadcast'
+      fullPath: '/admin/broadcast'
+      preLoaderRoute: typeof AdminBroadcastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FixRoute: FixRoute,
+  HistoryRoute: HistoryRoute,
+  LoginRoute: LoginRoute,
+  ProfilRoute: ProfilRoute,
+  ReferralRoute: ReferralRoute,
+  AdminBroadcastRoute: AdminBroadcastRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminGmailRoute: AdminGmailRoute,
+  AdminOwnerRoute: AdminOwnerRoute,
+  AdminPremiumRoute: AdminPremiumRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTemplatesRoute: AdminTemplatesRoute,
+  AdminUsersRoute: AdminUsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
