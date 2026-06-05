@@ -8,6 +8,7 @@ import { Card, Button, Input, Label } from "@/components/ui-bits";
 import { BottomSheet } from "@/components/BottomSheet";
 import { api } from "@/lib/api";
 import { tgHaptic } from "@/lib/telegram";
+import { LimitExceededCard } from "@/components/LimitExceededCard";
 
 export const Route = createFileRoute("/fix")({
   component: FixPage,
@@ -88,6 +89,14 @@ function FixPage() {
   const submit = async () => {
     if (!isValid) return toast.error("Nomor tidak valid");
     if (cooldown > 0) return;
+    if (limits.data && !limits.data.unlimited && limits.data.remaining <= 0) {
+      tgHaptic("error");
+      toast.error("⚠️ Limit habis! Hubungi owner untuk upgrade.", {
+        duration: 4000,
+        style: { background: "#FF9F0A", color: "#fff" },
+      });
+      return;
+    }
     setSending(true);
     try {
       const { data } = await api.post("/fix/send", {
@@ -130,21 +139,7 @@ function FixPage() {
       <Header title="Fix Nomor" />
 
       {limitOut ? (
-        <Card className="text-center">
-          <div className="text-4xl">⏳</div>
-          <h3 className="mt-3 text-lg font-bold">Limit Harian Habis</h3>
-          <p className="mt-1 text-sm text-white/55">
-            Reset {limits.data?.reset_label ?? "00:00 WIB"}
-          </p>
-          <Button
-            variant="ghost"
-            full
-            className="mt-5"
-            onClick={() => navigate({ to: "/referral" })}
-          >
-            🎁 Dapat Bonus (Referral)
-          </Button>
-        </Card>
+        <LimitExceededCard resetLabel={limits.data?.reset_label ?? "00:00 WIB"} />
       ) : (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="space-y-5">

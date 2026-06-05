@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { Card, Progress, Skeleton } from "@/components/ui-bits";
 import { Header } from "@/components/Header";
 import { tgHaptic } from "@/lib/telegram";
+import { LimitExceededCard } from "@/components/LimitExceededCard";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -90,6 +91,15 @@ function HomePage() {
           )}
         </Card>
       </motion.div>
+
+      {user.role === "free" &&
+        data &&
+        !data.unlimited &&
+        data.remaining <= 0 && (
+          <motion.div {...stagger(2)} className="mb-3">
+            <LimitExceededCard resetLabel={data?.reset_label ?? "00:00 WIB"} />
+          </motion.div>
+        )}
 
       <motion.div {...stagger(2)}>
         <Card className="mb-3">
