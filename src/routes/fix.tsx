@@ -8,6 +8,7 @@ import { Card, Button, Input, Label } from "@/components/ui-bits";
 import { BottomSheet } from "@/components/BottomSheet";
 import { api } from "@/lib/api";
 import { tgHaptic } from "@/lib/telegram";
+import { LimitExceededCard } from "@/components/LimitExceededCard";
 
 export const Route = createFileRoute("/fix")({
   component: FixPage,
