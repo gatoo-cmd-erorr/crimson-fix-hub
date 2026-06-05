@@ -92,6 +92,15 @@ function HomePage() {
         </Card>
       </motion.div>
 
+      {user.role === "free" &&
+        data &&
+        !data.unlimited &&
+        data.remaining <= 0 && (
+          <motion.div {...stagger(2)} className="mb-3">
+            <LimitExceededCard resetLabel={data?.reset_label ?? "00:00 WIB"} />
+          </motion.div>
+        )}
+
       <motion.div {...stagger(2)}>
         <Card className="mb-3">
           <div className="flex items-center gap-3">
