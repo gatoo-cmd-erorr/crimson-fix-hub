@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { Card, Progress, Skeleton } from "@/components/ui-bits";
 import { Header } from "@/components/Header";
 import { tgHaptic } from "@/lib/telegram";
+import { LimitExceededCard } from "@/components/LimitExceededCard";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
