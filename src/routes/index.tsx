@@ -144,7 +144,7 @@ function HomePage() {
           tgHaptic("medium");
           navigate({ to: "/fix" });
         }}
-        className="press w-full animate-pulse-red rounded-xl bg-[linear-gradient(135deg,#E8192C,#B5001E)] py-4 text-base font-bold text-white"
+        className="press w-full animate-pulse-red rounded-xl bg-[linear-gradient(135deg,#0A84FF,#0060CC)] py-4 text-base font-bold text-white"
       >
         🔧 MULAI FIX
       </motion.button>

@@ -126,7 +126,7 @@ function AdminGmail() {
         <ul className="space-y-2">
           {data.items.map((g) => (
             <li key={g._id}>
-              <Card className={g.is_current ? "border-primary/50 shadow-[0_0_16px_rgba(232,25,44,0.2)]" : ""}>
+              <Card className={g.is_current ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]" : ""}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">{g.email}</p>

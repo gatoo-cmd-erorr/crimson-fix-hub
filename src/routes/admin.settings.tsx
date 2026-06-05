@@ -187,7 +187,7 @@ function AdminSettings() {
       <button
         onClick={save}
         disabled={busy}
-        className="press fixed bottom-24 right-5 z-30 h-14 rounded-full bg-primary px-5 font-bold text-white shadow-[0_8px_24px_rgba(232,25,44,0.5)] disabled:opacity-60"
+        className="press fixed bottom-24 right-5 z-30 h-14 rounded-full bg-primary px-5 font-bold text-white shadow-[0_8px_24px_rgba(10,132,255,0.5)] disabled:opacity-60"
       >
         {busy ? "..." : "💾 Simpan"}
       </button>
