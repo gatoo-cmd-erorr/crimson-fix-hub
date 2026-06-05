@@ -131,21 +131,7 @@ function FixPage() {
       <Header title="Fix Nomor" />
 
       {limitOut ? (
-        <Card className="text-center">
-          <div className="text-4xl">⏳</div>
-          <h3 className="mt-3 text-lg font-bold">Limit Harian Habis</h3>
-          <p className="mt-1 text-sm text-white/55">
-            Reset {limits.data?.reset_label ?? "00:00 WIB"}
-          </p>
-          <Button
-            variant="ghost"
-            full
-            className="mt-5"
-            onClick={() => navigate({ to: "/referral" })}
-          >
-            🎁 Dapat Bonus (Referral)
-          </Button>
-        </Card>
+        <LimitExceededCard resetLabel={limits.data?.reset_label ?? "00:00 WIB"} />
       ) : (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="space-y-5">
