@@ -3,14 +3,11 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  HeadContent,
-  Scripts,
   useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
-import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { initTelegram } from "@/lib/telegram";
 import { BottomNav } from "@/components/BottomNav";
@@ -53,47 +50,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      {
-        name: "viewport",
-        content:
-          "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
-      },
-      { name: "theme-color", content: "#000000" },
-      { title: "Fix Merah" },
-      {
-        name: "description",
-        content: "Sistem Fix Nomor Profesional - Fix Merah WebApp",
-      },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-    ],
-    scripts: [
-      { src: "https://telegram.org/js/telegram-web-app.js", async: true },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
-
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="id" className="dark">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function PageFrame() {
   const { location } = useRouterState();
