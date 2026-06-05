@@ -89,6 +89,14 @@ function FixPage() {
   const submit = async () => {
     if (!isValid) return toast.error("Nomor tidak valid");
     if (cooldown > 0) return;
+    if (limits.data && !limits.data.unlimited && limits.data.remaining <= 0) {
+      tgHaptic("error");
+      toast.error("⚠️ Limit habis! Hubungi owner untuk upgrade.", {
+        duration: 4000,
+        style: { background: "#FF9F0A", color: "#fff" },
+      });
+      return;
+    }
     setSending(true);
     try {
       const { data } = await api.post("/fix/send", {
