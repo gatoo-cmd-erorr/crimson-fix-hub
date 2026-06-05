@@ -44,8 +44,8 @@
     sans-serif;
 
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-red-glow: 0 0 20px rgba(232, 25, 44, 0.3);
-  --shadow-red-glow-lg: 0 8px 24px rgba(232, 25, 44, 0.4);
+  --shadow-red-glow: 0 0 20px rgba(10, 132, 255, 0.3);
+  --shadow-red-glow-lg: 0 8px 24px rgba(10, 132, 255, 0.4);
 
   --ease-apple: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
@@ -75,12 +75,12 @@
   @keyframes pulse-red {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(232, 25, 44, 0.5),
-        0 8px 24px rgba(232, 25, 44, 0.4);
+      box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.5),
+        0 8px 24px rgba(10, 132, 255, 0.4);
     }
     50% {
-      box-shadow: 0 0 0 12px rgba(232, 25, 44, 0),
-        0 8px 24px rgba(232, 25, 44, 0.4);
+      box-shadow: 0 0 0 12px rgba(10, 132, 255, 0),
+        0 8px 24px rgba(10, 132, 255, 0.4);
     }
   }
   @keyframes shimmer {
@@ -132,10 +132,10 @@
 
   --primary: #0A84FF;
   --primary-foreground: #ffffff;
-  --primary-tint: rgba(232, 25, 44, 0.15);
+  --primary-tint: rgba(10, 132, 255, 0.15);
   --secondary: rgba(255, 255, 255, 0.08);
   --secondary-foreground: #ffffff;
-  --accent: rgba(232, 25, 44, 0.12);
+  --accent: rgba(10, 132, 255, 0.12);
   --accent-foreground: #ffffff;
 
   --destructive: #ff453a;
@@ -161,7 +161,7 @@
   body {
     background-image: radial-gradient(
         ellipse at top,
-        rgba(232, 25, 44, 0.08),
+        rgba(10, 132, 255, 0.08),
         transparent 60%
       ),
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
