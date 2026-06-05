@@ -151,7 +151,7 @@ function AdminTemplates() {
               <Card
                 className={
                   t.is_active
-                    ? "border-primary/50 shadow-[0_0_16px_rgba(232,25,44,0.2)]"
+                    ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]"
                     : ""
                 }
               >

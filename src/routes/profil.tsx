@@ -34,7 +34,7 @@ function ProfilPage() {
       <Header title="Profil Saya" />
 
       <Card className="mb-3 flex flex-col items-center text-center">
-        <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#E8192C,#8B0014)] text-2xl font-bold">
+        <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#0A84FF,#0060CC)] text-2xl font-bold">
           {initials}
         </div>
         <h2 className="mt-3 text-xl font-bold">{user.username}</h2>

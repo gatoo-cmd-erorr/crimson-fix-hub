@@ -45,7 +45,7 @@ function LoginPage() {
           <div className="relative">
             <div className="absolute inset-0 animate-pulse-red rounded-3xl bg-primary/30 blur-2xl" />
             <div
-              className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#E8192C,#8B0014)] text-4xl text-white"
+              className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#0A84FF,#0060CC)] text-4xl text-white"
               style={{ boxShadow: "var(--shadow-red-glow-lg)" }}
             >
               🛡️

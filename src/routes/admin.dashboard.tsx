@@ -113,9 +113,9 @@ function AdminDashboard() {
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="#E8192C"
+                  stroke="#0A84FF"
                   strokeWidth={2.5}
-                  dot={{ fill: "#E8192C", r: 3 }}
+                  dot={{ fill: "#0A84FF", r: 3 }}
                   activeDot={{ r: 5 }}
                 />
               </LineChart>

@@ -12,7 +12,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`glass rounded-2xl p-4 ${glow ? "shadow-[0_0_20px_rgba(232,25,44,0.25)] border-primary/40" : ""} ${className}`}
+      className={`glass rounded-2xl p-4 ${glow ? "shadow-[0_0_20px_rgba(10,132,255,0.25)] border-primary/40" : ""} ${className}`}
       style={glow ? undefined : { boxShadow: "var(--shadow-glass)" }}
     >
       {children}
@@ -34,11 +34,11 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
     "press inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-12 px-5 text-[15px]";
   const variants: Record<string, string> = {
     primary:
-      "text-white bg-[linear-gradient(135deg,#E8192C,#B5001E)] shadow-[0_8px_24px_rgba(232,25,44,0.4)]",
+      "text-white bg-[linear-gradient(135deg,#0A84FF,#0060CC)] shadow-[0_8px_24px_rgba(10,132,255,0.4)]",
     secondary: "text-white bg-white/10 border border-white/10",
     ghost: "text-primary border border-primary/60 bg-transparent",
     danger:
-      "text-white bg-[linear-gradient(135deg,#FF453A,#B5001E)]",
+      "text-white bg-[linear-gradient(135deg,#FF453A,#0060CC)]",
   };
   return (
     <button
@@ -81,7 +81,7 @@ export function Progress({ value, max = 100 }: { value: number; max?: number }) 
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
       <div
-        className="h-full rounded-full bg-[linear-gradient(90deg,#E8192C,#FF6B7A)] transition-[width] duration-700"
+        className="h-full rounded-full bg-[linear-gradient(90deg,#0A84FF,#5AB0FF)] transition-[width] duration-700"
         style={{ width: `${pct}%` }}
       />
     </div>
