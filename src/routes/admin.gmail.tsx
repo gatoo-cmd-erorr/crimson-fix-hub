@@ -116,6 +116,42 @@ function AdminGmail() {
                 </button>
               </div>
             </div>
+            {(email || pw) && (
+              <Card glow className="!bg-white/3 text-xs">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  Preview Gmail
+                </p>
+                <div className="space-y-1.5 text-white/75">
+                  <div className="break-all">
+                    <span className="text-white/40">📧 Email:</span>{" "}
+                    {email || "—"}{" "}
+                    {email && (
+                      <span className={emailValid ? "text-success" : "text-danger"}>
+                        {emailValid ? "✓" : "✗ format salah"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="break-all">
+                    <span className="text-white/40">🔑 App Password:</span>{" "}
+                    {pw ? "•".repeat(Math.min(pw.length, 16)) : "—"}
+                  </div>
+                  <div>
+                    <span className="text-white/40">Status:</span>{" "}
+                    <span
+                      className={
+                        emailValid && pw.length >= 8
+                          ? "text-success"
+                          : "text-warning"
+                      }
+                    >
+                      {emailValid && pw.length >= 8
+                        ? "● Siap disimpan"
+                        : "● Lengkapi data"}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            )}
             <Button full loading={busy} onClick={add}>
               Tambah
             </Button>
