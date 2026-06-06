@@ -50,11 +50,16 @@ function AdminTemplates() {
       return toast.error("Lengkapi semua field");
     setBusy(true);
     try {
-      await api.post("/template/add", form);
-      toast.success("Tersimpan");
+      const { data: created } = await api.post("/template/add", form);
+      toast.success(`✅ Template "${form.name}" tersimpan`);
+      const newId = created?._id ?? created?.item?._id ?? null;
       setForm({ name: "", to_email: "", subject: "", body: "", is_active: false });
       setOpen(false);
-      refetch();
+      await refetch();
+      if (newId) {
+        setHighlightId(newId);
+        setTimeout(() => setHighlightId(null), 3000);
+      }
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
