@@ -169,11 +169,15 @@ function AdminTemplates() {
           {data.items.map((t) => (
             <li key={t._id}>
               <Card
-                className={
+                className={`${
                   t.is_active
                     ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]"
                     : ""
-                }
+                } ${
+                  highlightId === t._id
+                    ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]"
+                    : ""
+                }`}
               >
                 <button
                   onClick={() => setExpanded((e) => (e === t._id ? null : t._id))}
