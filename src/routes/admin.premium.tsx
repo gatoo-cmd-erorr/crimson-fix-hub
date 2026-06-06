@@ -31,6 +31,7 @@ function AdminPremium() {
   const [days, setDays] = useState(30);
   const [busy, setBusy] = useState(false);
   const [gratis, setGratis] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const list = useQuery<{ items: P[] }>({
     queryKey: ["admin-premium"],
@@ -45,14 +46,33 @@ function AdminPremium() {
     },
   });
 
+  const previewExpiry = useMemo(() => {
+    if (days === 0) return "Permanent";
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }, [days]);
+
   const add = async () => {
     if (!tg) return toast.error("Isi Telegram ID");
     setBusy(true);
     try {
-      await api.post("/admin/premium/add", { telegram_id: tg, days });
-      toast.success("Premium ditambahkan");
+      const { data: created } = await api.post("/admin/premium/add", {
+        telegram_id: tg,
+        days,
+      });
+      toast.success(`✅ Premium ${days === 0 ? "Permanent" : days + " hari"} ditambahkan`);
+      const newId = created?._id ?? created?.item?._id ?? null;
       setTg("");
-      list.refetch();
+      await list.refetch();
+      if (newId) {
+        setHighlightId(newId);
+        setTimeout(() => setHighlightId(null), 3000);
+      }
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
