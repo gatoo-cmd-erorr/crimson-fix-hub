@@ -12,7 +12,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`glass rounded-2xl p-4 ${glow ? "shadow-[0_0_20px_rgba(10,132,255,0.25)] border-primary/40" : ""} ${className}`}
+      className={`glass overflow-hidden rounded-2xl p-4 ${glow ? "shadow-[0_0_20px_rgba(10,132,255,0.25)] border-primary/40" : ""} ${className}`}
       style={glow ? undefined : { boxShadow: "var(--shadow-glass)" }}
     >
       {children}
