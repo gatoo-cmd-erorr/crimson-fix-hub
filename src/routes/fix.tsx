@@ -117,7 +117,6 @@ function FixPage() {
       tgHaptic("error");
       // mandatory_join_required is handled by global gate; don't show local sheet
       if (err?.response?.data?.message === "mandatory_join_required") {
-        setSending(false);
         return;
       }
       setResult({
