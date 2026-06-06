@@ -31,15 +31,18 @@ function AdminTemplates() {
   });
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery<{ items: T[] }>({
     queryKey: ["admin-templates"],
     queryFn: async () => (await api.get("/template/list")).data,
   });
 
+  const SAMPLE_NOMOR = "+628123456789";
   const preview = useMemo(() => ({
-    subject: form.subject.replaceAll("{nomor}", "08123456789"),
-    body: form.body.replaceAll("{nomor}", "08123456789"),
+    subject: form.subject.replaceAll("{nomor}", SAMPLE_NOMOR),
+    to: form.to_email || "(belum diisi)",
+    nomor: SAMPLE_NOMOR,
   }), [form]);
 
   const save = async () => {
@@ -47,11 +50,16 @@ function AdminTemplates() {
       return toast.error("Lengkapi semua field");
     setBusy(true);
     try {
-      await api.post("/template/add", form);
-      toast.success("Tersimpan");
+      const { data: created } = await api.post("/template/add", form);
+      toast.success(`✅ Template "${form.name}" tersimpan`);
+      const newId = created?._id ?? created?.item?._id ?? null;
       setForm({ name: "", to_email: "", subject: "", body: "", is_active: false });
       setOpen(false);
-      refetch();
+      await refetch();
+      if (newId) {
+        setHighlightId(newId);
+        setTimeout(() => setHighlightId(null), 3000);
+      }
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
@@ -114,12 +122,24 @@ function AdminTemplates() {
                 placeholder="gunakan {nomor}"
               />
             </div>
-            <Card className="!bg-white/3 text-xs">
-              <p className="mb-1 font-semibold text-white/55">Preview</p>
-              <p className="text-white/70">
-                <span className="text-white/40">Subject:</span> {preview.subject}
+            <Card glow className="!bg-white/3 text-xs">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+                Preview Pengiriman
               </p>
-              <p className="mt-1 whitespace-pre-wrap text-white/70">{preview.body}</p>
+              <div className="space-y-1.5 text-white/75">
+                <div className="break-all">
+                  <span className="text-white/40">📧 To:</span> {preview.to}
+                </div>
+                <div className="break-all">
+                  <span className="text-white/40">📌 Subject:</span> {preview.subject}
+                </div>
+                <div className="break-all">
+                  <span className="text-white/40">📞 Nomor:</span> {preview.nomor}
+                </div>
+                <div className="mt-2 rounded-lg bg-black/20 px-2 py-1 text-[10px] text-white/40">
+                  Body email disembunyikan dari preview pengiriman
+                </div>
+              </div>
             </Card>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -149,11 +169,15 @@ function AdminTemplates() {
           {data.items.map((t) => (
             <li key={t._id}>
               <Card
-                className={
+                className={`${
                   t.is_active
                     ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]"
                     : ""
-                }
+                } ${
+                  highlightId === t._id
+                    ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]"
+                    : ""
+                }`}
               >
                 <button
                   onClick={() => setExpanded((e) => (e === t._id ? null : t._id))}

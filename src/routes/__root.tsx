@@ -10,7 +10,9 @@ import { Toaster } from "react-hot-toast";
 
 import { AuthProvider } from "@/lib/auth";
 import { initTelegram } from "@/lib/telegram";
+import { initFingerprint } from "@/lib/fingerprint";
 import { BottomNav } from "@/components/BottomNav";
+import { MandatoryJoinGate } from "@/components/MandatoryJoinGate";
 
 function NotFoundComponent() {
   return (
@@ -66,6 +68,7 @@ function PageFrame() {
         <Outlet />
       </main>
       {!isLogin && <BottomNav />}
+      {!isLogin && <MandatoryJoinGate />}
     </>
   );
 }
@@ -75,6 +78,7 @@ function RootComponent() {
 
   useEffect(() => {
     initTelegram();
+    initFingerprint();
   }, []);
 
   return (

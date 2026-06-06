@@ -27,7 +27,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="glass-strong fixed inset-x-0 bottom-0 z-40 border-t border-divider"
+      className="glass-strong fixed inset-x-0 bottom-0 z-50 border-t border-divider"
       style={{
         paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)",
       }}

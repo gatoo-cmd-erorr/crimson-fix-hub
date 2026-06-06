@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
@@ -31,6 +31,7 @@ function AdminPremium() {
   const [days, setDays] = useState(30);
   const [busy, setBusy] = useState(false);
   const [gratis, setGratis] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const list = useQuery<{ items: P[] }>({
     queryKey: ["admin-premium"],
@@ -45,14 +46,33 @@ function AdminPremium() {
     },
   });
 
+  const previewExpiry = useMemo(() => {
+    if (days === 0) return "Permanent";
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }, [days]);
+
   const add = async () => {
     if (!tg) return toast.error("Isi Telegram ID");
     setBusy(true);
     try {
-      await api.post("/admin/premium/add", { telegram_id: tg, days });
-      toast.success("Premium ditambahkan");
+      const { data: created } = await api.post("/admin/premium/add", {
+        telegram_id: tg,
+        days,
+      });
+      toast.success(`✅ Premium ${days === 0 ? "Permanent" : days + " hari"} ditambahkan`);
+      const newId = created?._id ?? created?.item?._id ?? null;
       setTg("");
-      list.refetch();
+      await list.refetch();
+      if (newId) {
+        setHighlightId(newId);
+        setTimeout(() => setHighlightId(null), 3000);
+      }
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
@@ -96,6 +116,26 @@ function AdminPremium() {
             ))}
           </div>
         </div>
+        {tg && (
+          <Card glow className="!bg-white/3 text-xs">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+              Preview Premium
+            </p>
+            <div className="space-y-1.5 text-white/75">
+              <div className="break-all">
+                <span className="text-white/40">👤 Telegram ID:</span> {tg}
+              </div>
+              <div>
+                <span className="text-white/40">⏱ Durasi:</span>{" "}
+                {days === 0 ? "Permanent" : `${days} hari`}
+              </div>
+              <div>
+                <span className="text-white/40">📅 Berakhir:</span>{" "}
+                <span className="font-semibold text-white">{previewExpiry}</span>
+              </div>
+            </div>
+          </Card>
+        )}
         <Button full loading={busy} onClick={add}>
           + Tambah Premium
         </Button>
@@ -121,7 +161,9 @@ function AdminPremium() {
         <ul className="space-y-2">
           {list.data.items.map((p) => (
             <li key={p._id}>
-              <Card className="!p-3">
+              <Card
+                className={`!p-3 ${highlightId === p._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]" : ""}`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold">{p.username ?? p.telegram_id}</p>

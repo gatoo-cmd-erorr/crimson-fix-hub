@@ -26,6 +26,7 @@ function AdminGmail() {
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
   const [health, setHealth] = useState<Record<string, { ok: boolean; msg: string } | undefined>>({});
 
   const { data, isLoading, refetch } = useQuery<{ items: G[] }>({
@@ -33,16 +34,24 @@ function AdminGmail() {
     queryFn: async () => (await api.get("/gmail/list")).data,
   });
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const add = async () => {
     if (!email || !pw) return toast.error("Isi semua field");
+    if (!emailValid) return toast.error("Format email salah");
     setBusy(true);
     try {
-      await api.post("/gmail/add", { email, app_password: pw });
-      toast.success("Ditambahkan");
+      const { data: created } = await api.post("/gmail/add", { email, app_password: pw });
+      toast.success(`✅ Gmail ${email} ditambahkan`);
+      const newId = created?._id ?? created?.item?._id ?? null;
       setEmail("");
       setPw("");
       setOpen(false);
-      refetch();
+      await refetch();
+      if (newId) {
+        setHighlightId(newId);
+        setTimeout(() => setHighlightId(null), 3000);
+      }
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
@@ -107,6 +116,42 @@ function AdminGmail() {
                 </button>
               </div>
             </div>
+            {(email || pw) && (
+              <Card glow className="!bg-white/3 text-xs">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  Preview Gmail
+                </p>
+                <div className="space-y-1.5 text-white/75">
+                  <div className="break-all">
+                    <span className="text-white/40">📧 Email:</span>{" "}
+                    {email || "—"}{" "}
+                    {email && (
+                      <span className={emailValid ? "text-success" : "text-danger"}>
+                        {emailValid ? "✓" : "✗ format salah"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="break-all">
+                    <span className="text-white/40">🔑 App Password:</span>{" "}
+                    {pw ? "•".repeat(Math.min(pw.length, 16)) : "—"}
+                  </div>
+                  <div>
+                    <span className="text-white/40">Status:</span>{" "}
+                    <span
+                      className={
+                        emailValid && pw.length >= 8
+                          ? "text-success"
+                          : "text-warning"
+                      }
+                    >
+                      {emailValid && pw.length >= 8
+                        ? "● Siap disimpan"
+                        : "● Lengkapi data"}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            )}
             <Button full loading={busy} onClick={add}>
               Tambah
             </Button>
@@ -126,7 +171,9 @@ function AdminGmail() {
         <ul className="space-y-2">
           {data.items.map((g) => (
             <li key={g._id}>
-              <Card className={g.is_current ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]" : ""}>
+              <Card
+                className={`${g.is_current ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]" : ""} ${highlightId === g._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]" : ""}`}
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">{g.email}</p>

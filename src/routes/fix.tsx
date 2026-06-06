@@ -82,7 +82,7 @@ function FixPage() {
     return {
       to: tpl.data.to_email,
       subject: tpl.data.subject.replaceAll("{nomor}", sample),
-      body: tpl.data.body.replaceAll("{nomor}", sample),
+      nomor: sample,
     };
   }, [tpl.data, normalized]);
 
@@ -115,6 +115,10 @@ function FixPage() {
       limits.refetch();
     } catch (err: any) {
       tgHaptic("error");
+      // mandatory_join_required is handled by global gate; don't show local sheet
+      if (err?.response?.data?.message === "mandatory_join_required") {
+        return;
+      }
       setResult({
         ok: false,
         error:
@@ -176,19 +180,23 @@ function FixPage() {
               </button>
               {tpl.data && (
                 <Card className="mt-3 !bg-white/3 text-xs">
-                  <div className="mb-1 font-semibold text-white/55">
+                  <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+                    Preview Pengiriman
+                  </div>
+                  <div className="mb-2 font-semibold text-white/55">
                     {tpl.data.name}
                   </div>
-                  <div className="space-y-1 text-white/70">
-                    <div>
-                      <span className="text-white/40">To:</span> {preview?.to}
+                  <div className="space-y-1.5 text-white/75">
+                    <div className="break-all">
+                      <span className="text-white/40">📧 To:</span> {preview?.to}
                     </div>
-                    <div>
-                      <span className="text-white/40">Subject:</span>{" "}
+                    <div className="break-all">
+                      <span className="text-white/40">📌 Subject:</span>{" "}
                       {preview?.subject}
                     </div>
-                    <div className="mt-2 whitespace-pre-wrap rounded-lg bg-black/30 p-2 text-white/65">
-                      {preview?.body}
+                    <div className="break-all">
+                      <span className="text-white/40">📞 Nomor:</span>{" "}
+                      {preview?.nomor}
                     </div>
                   </div>
                 </Card>

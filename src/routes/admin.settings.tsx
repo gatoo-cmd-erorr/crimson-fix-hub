@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
@@ -184,6 +184,10 @@ function AdminSettings() {
         )}
       </Section>
 
+      <MandatoryJoinSection />
+
+
+
       <button
         onClick={save}
         disabled={busy}
@@ -230,3 +234,265 @@ function ToggleRow({
     </div>
   );
 }
+
+// ============== Mandatory Join Section ==============
+
+interface MChannel {
+  _id: string;
+  name: string;
+  username: string;
+  type: "channel" | "group";
+  url: string;
+  is_active: boolean;
+}
+
+function MandatoryJoinSection() {
+  const [enabled, setEnabled] = useState(false);
+  const [botToken, setBotToken] = useState("");
+  const [showToken, setShowToken] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    username: "",
+    type: "channel" as "channel" | "group",
+    url: "",
+  });
+  const [adding, setAdding] = useState(false);
+
+  const settingsQ = useQuery({
+    queryKey: ["mandatory-settings"],
+    queryFn: async () => {
+      const { data } = await api.get("/admin/settings");
+      setEnabled(!!data.mandatory_join_enabled);
+      setBotToken(data.bot_token ?? "");
+      return data;
+    },
+  });
+
+  const channelsQ = useQuery<{ items: MChannel[] }>({
+    queryKey: ["admin-mandatory"],
+    queryFn: async () => (await api.get("/admin/mandatory/list")).data,
+  });
+
+  const channels = channelsQ.data?.items ?? [];
+  const max = 10;
+
+  const saveSettings = async (next: { enabled?: boolean; bot_token?: string }) => {
+    setSavingSettings(true);
+    try {
+      const payload: any = {};
+      if (next.enabled !== undefined) payload.mandatory_join_enabled = next.enabled;
+      if (next.bot_token !== undefined) payload.bot_token = next.bot_token;
+      await api.post("/admin/settings", payload);
+      toast.success("Tersimpan");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const addChannel = async () => {
+    if (!form.name || !form.username || !form.url) {
+      return toast.error("Lengkapi semua field");
+    }
+    if (channels.length >= max) {
+      return toast.error(`Maksimal ${max} channel`);
+    }
+    setAdding(true);
+    try {
+      await api.post("/admin/mandatory/add", form);
+      toast.success("✅ Channel ditambahkan");
+      setForm({ name: "", username: "", type: "channel", url: "" });
+      channelsQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const toggleChannel = async (id: string) => {
+    try {
+      await api.put(`/admin/mandatory/${id}/toggle`);
+      channelsQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
+  };
+
+  const deleteChannel = async (id: string) => {
+    if (!confirm("Hapus channel ini?")) return;
+    try {
+      await api.delete(`/admin/mandatory/${id}`);
+      toast.success("Dihapus");
+      channelsQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
+  };
+
+  return (
+    <div className="mb-4">
+      <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-white/45">
+        Mandatory Join 🔒
+      </p>
+      <Card className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold">Aktifkan Mandatory Join</p>
+            <p className="text-[11px] text-white/50">
+              User wajib join semua channel sebelum bisa fix
+            </p>
+          </div>
+          <Switch
+            checked={enabled}
+            onChange={(v) => {
+              setEnabled(v);
+              saveSettings({ enabled: v });
+            }}
+          />
+        </div>
+
+        <div>
+          <Label>Bot Token (Telegram)</Label>
+          <div className="relative">
+            <Input
+              type={showToken ? "text" : "password"}
+              value={botToken}
+              onChange={(e) => setBotToken(e.target.value)}
+              placeholder="123456:ABC-DEF..."
+            />
+            <button
+              type="button"
+              onClick={() => setShowToken((s) => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/55"
+            >
+              {showToken ? "🙈" : "👁"}
+            </button>
+          </div>
+          <Button
+            variant="secondary"
+            full
+            className="mt-2"
+            loading={savingSettings}
+            onClick={() => saveSettings({ bot_token: botToken })}
+          >
+            Simpan Token
+          </Button>
+        </div>
+
+        <div className="rounded-xl border border-white/8 bg-white/3 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-bold uppercase text-white/55">
+              Channel Wajib
+            </p>
+            <span
+              className={`text-[11px] font-bold ${channels.length >= max ? "text-warning" : "text-white/55"}`}
+            >
+              {channels.length}/{max}
+            </span>
+          </div>
+
+          {channelsQ.isLoading ? (
+            <Skeleton className="h-16" />
+          ) : channels.length === 0 ? (
+            <p className="py-3 text-center text-xs text-white/40">
+              Belum ada channel
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {channels.map((c) => (
+                <li
+                  key={c._id}
+                  className={`flex items-center gap-2 rounded-xl border p-2 ${c.is_active ? "border-primary/30 bg-primary/5" : "border-white/8 bg-white/3 opacity-60"}`}
+                >
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-base">
+                    {c.type === "group" ? "👥" : "📢"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold">{c.name}</p>
+                    <p className="truncate text-[10px] text-white/50">
+                      {c.username}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={c.is_active}
+                    onChange={() => toggleChannel(c._id)}
+                  />
+                  <button
+                    onClick={() => deleteChannel(c._id)}
+                    className="press flex h-8 w-8 items-center justify-center rounded-lg bg-danger/15 text-xs text-danger"
+                    aria-label="hapus"
+                  >
+                    🗑
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {channels.length < max && (
+          <div className="space-y-2 rounded-xl border border-white/8 bg-white/3 p-3">
+            <p className="text-xs font-bold uppercase text-white/55">
+              + Tambah Channel/Grup
+            </p>
+            <div>
+              <Label>Display Name</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Channel Resmi Fix Merah"
+              />
+            </div>
+            <div>
+              <Label>Username</Label>
+              <Input
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                placeholder="@channelname"
+              />
+            </div>
+            <div>
+              <Label>Type</Label>
+              <div className="flex gap-2">
+                {(["channel", "group"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setForm({ ...form, type: t })}
+                    className={`press flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${form.type === t ? "bg-primary text-white" : "bg-white/8 text-white/65"}`}
+                  >
+                    {t === "channel" ? "📢 Channel" : "👥 Grup"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>URL Telegram</Label>
+              <Input
+                value={form.url}
+                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                placeholder="https://t.me/channelname"
+              />
+            </div>
+            {form.url && (
+              <a
+                href={form.url}
+                target="_blank"
+                rel="noreferrer"
+                className="block break-all text-[11px] text-primary underline"
+              >
+                Preview: {form.url}
+              </a>
+            )}
+            <Button full loading={adding} onClick={addChannel}>
+              + Tambah
+            </Button>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
