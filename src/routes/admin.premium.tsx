@@ -161,7 +161,9 @@ function AdminPremium() {
         <ul className="space-y-2">
           {list.data.items.map((p) => (
             <li key={p._id}>
-              <Card className="!p-3">
+              <Card
+                className={`!p-3 ${highlightId === p._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]" : ""}`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold">{p.username ?? p.telegram_id}</p>
