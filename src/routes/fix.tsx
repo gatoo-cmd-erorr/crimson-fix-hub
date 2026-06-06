@@ -82,7 +82,7 @@ function FixPage() {
     return {
       to: tpl.data.to_email,
       subject: tpl.data.subject.replaceAll("{nomor}", sample),
-      body: tpl.data.body.replaceAll("{nomor}", sample),
+      nomor: sample,
     };
   }, [tpl.data, normalized]);
 
