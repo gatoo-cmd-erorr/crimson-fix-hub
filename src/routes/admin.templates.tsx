@@ -31,6 +31,7 @@ function AdminTemplates() {
   });
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery<{ items: T[] }>({
     queryKey: ["admin-templates"],
