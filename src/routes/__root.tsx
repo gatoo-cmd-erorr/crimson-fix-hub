@@ -78,6 +78,7 @@ function RootComponent() {
 
   useEffect(() => {
     initTelegram();
+    initFingerprint();
   }, []);
 
   return (
