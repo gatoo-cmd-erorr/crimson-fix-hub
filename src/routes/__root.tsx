@@ -68,6 +68,7 @@ function PageFrame() {
         <Outlet />
       </main>
       {!isLogin && <BottomNav />}
+      {!isLogin && <MandatoryJoinGate />}
     </>
   );
 }
