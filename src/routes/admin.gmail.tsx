@@ -26,6 +26,7 @@ function AdminGmail() {
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
   const [health, setHealth] = useState<Record<string, { ok: boolean; msg: string } | undefined>>({});
 
   const { data, isLoading, refetch } = useQuery<{ items: G[] }>({
@@ -33,16 +34,24 @@ function AdminGmail() {
     queryFn: async () => (await api.get("/gmail/list")).data,
   });
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const add = async () => {
     if (!email || !pw) return toast.error("Isi semua field");
+    if (!emailValid) return toast.error("Format email salah");
     setBusy(true);
     try {
-      await api.post("/gmail/add", { email, app_password: pw });
-      toast.success("Ditambahkan");
+      const { data: created } = await api.post("/gmail/add", { email, app_password: pw });
+      toast.success(`✅ Gmail ${email} ditambahkan`);
+      const newId = created?._id ?? created?.item?._id ?? null;
       setEmail("");
       setPw("");
       setOpen(false);
-      refetch();
+      await refetch();
+      if (newId) {
+        setHighlightId(newId);
+        setTimeout(() => setHighlightId(null), 3000);
+      }
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
