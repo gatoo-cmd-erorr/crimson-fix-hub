@@ -184,6 +184,10 @@ function AdminSettings() {
         )}
       </Section>
 
+      <MandatoryJoinSection />
+
+
+
       <button
         onClick={save}
         disabled={busy}
