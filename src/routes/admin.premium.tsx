@@ -116,6 +116,26 @@ function AdminPremium() {
             ))}
           </div>
         </div>
+        {tg && (
+          <Card glow className="!bg-white/3 text-xs">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+              Preview Premium
+            </p>
+            <div className="space-y-1.5 text-white/75">
+              <div className="break-all">
+                <span className="text-white/40">👤 Telegram ID:</span> {tg}
+              </div>
+              <div>
+                <span className="text-white/40">⏱ Durasi:</span>{" "}
+                {days === 0 ? "Permanent" : `${days} hari`}
+              </div>
+              <div>
+                <span className="text-white/40">📅 Berakhir:</span>{" "}
+                <span className="font-semibold text-white">{previewExpiry}</span>
+              </div>
+            </div>
+          </Card>
+        )}
         <Button full loading={busy} onClick={add}>
           + Tambah Premium
         </Button>
