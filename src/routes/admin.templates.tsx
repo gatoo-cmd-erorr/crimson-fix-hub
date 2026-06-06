@@ -37,9 +37,11 @@ function AdminTemplates() {
     queryFn: async () => (await api.get("/template/list")).data,
   });
 
+  const SAMPLE_NOMOR = "+628123456789";
   const preview = useMemo(() => ({
-    subject: form.subject.replaceAll("{nomor}", "08123456789"),
-    body: form.body.replaceAll("{nomor}", "08123456789"),
+    subject: form.subject.replaceAll("{nomor}", SAMPLE_NOMOR),
+    to: form.to_email || "(belum diisi)",
+    nomor: SAMPLE_NOMOR,
   }), [form]);
 
   const save = async () => {
