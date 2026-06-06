@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const API_BASE =
   (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://your-backend.example.com";
+  "https://web-production-e5414.up.railway.app";
 
 export const api = axios.create({
   baseURL: API_BASE,
