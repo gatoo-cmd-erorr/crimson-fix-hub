@@ -14,27 +14,28 @@ export const Route = createFileRoute("/referral")({
   component: ReferralPage,
 });
 
-interface RefData {
-  link: string;
-  coin_balance: number;
-  total_coins_earned: number;
-  total_coins_spent: number;
-  confirmed_referrals: number;
-  pending_referrals?: number;
-}
-
-interface LeaderRow {
-  user_id: string;
-  username: string;
-  total_coins_earned: number;
-}
-
 interface CoinTx {
   _id: string;
   type: "earn" | "spend";
   amount: number;
   reason: string;
   timestamp: string;
+}
+
+interface RefData {
+  link: string;
+  coin_balance: number;
+  total_coins_earned: number;
+  total_coins_spent: number;
+  confirmed_referrals: number;
+  total_invited: number;
+  recent_transactions: CoinTx[];
+}
+
+interface LeaderRow {
+  user_id: string;
+  username: string;
+  total_coins_earned: number;
 }
 
 const REDEEM_COST = 3;
@@ -56,18 +57,46 @@ function ReferralPage() {
 
   const my = useQuery<RefData>({
     queryKey: ["referral-my"],
-    queryFn: async () => (await api.get("/referral/my")).data,
+    queryFn: async () => {
+      const r = await api.get("/referral/my");
+      const d = r.data ?? {};
+      return {
+        link: d.invite_link ?? d.link ?? "",
+        coin_balance: d.coin_balance ?? 0,
+        total_coins_earned: d.total_coins_earned ?? 0,
+        total_coins_spent: d.total_coins_spent ?? 0,
+        confirmed_referrals: d.confirmed_count ?? d.confirmed_referrals ?? 0,
+        total_invited: d.total_invited ?? 0,
+        recent_transactions: Array.isArray(d.recent_transactions) ? d.recent_transactions : [],
+      };
+    },
   });
 
   const lb = useQuery<LeaderRow[]>({
     queryKey: ["referral-lb"],
-    queryFn: async () => (await api.get("/referral/leaderboard")).data,
+    queryFn: async () => {
+      try {
+        const r = await api.get("/referral/leaderboard");
+        return Array.isArray(r.data) ? r.data : r.data?.leaderboard ?? [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const txs = useQuery<CoinTx[]>({
     queryKey: ["referral-tx"],
-    queryFn: async () => (await api.get("/referral/transactions")).data,
+    queryFn: async () => {
+      try {
+        const r = await api.get("/referral/transactions");
+        return Array.isArray(r.data) ? r.data : r.data?.transactions ?? [];
+      } catch {
+        return my.data?.recent_transactions ?? [];
+      }
+    },
   });
+
+
 
   const balance = my.data?.coin_balance ?? 0;
 

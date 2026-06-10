@@ -33,7 +33,22 @@ function AdminDashboard() {
     queryKey: ["admin-dash"],
     queryFn: async () => (await api.get("/admin/dashboard")).data,
   });
+  const monStats = useQuery<{ expiring_h1?: number; expiring_h3?: number }>({
+    queryKey: ["mon-stats"],
+    queryFn: async () => (await api.get("/monitoring/stats")).data,
+  });
+  const blocked = useQuery<any[]>({
+    queryKey: ["sec-blocked"],
+    queryFn: async () => {
+      const r = await api.get("/security/blocked-users");
+      return Array.isArray(r.data) ? r.data : r.data?.users ?? [];
+    },
+  });
+  const expiringCount =
+    (monStats.data?.expiring_h1 ?? 0) + (monStats.data?.expiring_h3 ?? 0);
+  const blockedCount = blocked.data?.length ?? 0;
   const [tog, setTog] = useState(false);
+
 
   const toggleMaint = async (v: boolean) => {
     setTog(true);
@@ -77,6 +92,25 @@ function AdminDashboard() {
           loading={isLoading}
           accent="green"
         />
+        <Link to="/admin/monitoring" className="press">
+          <Stat
+            icon="🚨"
+            label="Akan Expired"
+            v={expiringCount}
+            loading={monStats.isLoading}
+            accent="red"
+          />
+        </Link>
+        <Link to="/admin/security" className="press">
+          <Stat
+            icon="🔒"
+            label="User Diblokir"
+            v={blockedCount}
+            loading={blocked.isLoading}
+            accent="red"
+          />
+        </Link>
+
       </div>
 
       <Card className="mb-3">
@@ -194,6 +228,9 @@ export function AdminSubNav() {
     { to: "/admin/gmail", label: "Gmail" },
     { to: "/admin/templates", label: "Template" },
     { to: "/admin/premium", label: "Premium" },
+    { to: "/admin/monitoring", label: "📊 Monitor" },
+    { to: "/admin/security", label: "🛡️ Keamanan" },
+    { to: "/admin/backup", label: "💾 Backup" },
     { to: "/admin/owner", label: "Owner" },
     { to: "/admin/broadcast", label: "Broadcast" },
     { to: "/admin/settings", label: "Settings" },
@@ -214,3 +251,4 @@ export function AdminSubNav() {
     </div>
   );
 }
+

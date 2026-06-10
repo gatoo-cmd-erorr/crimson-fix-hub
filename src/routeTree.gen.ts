@@ -18,11 +18,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminPremiumRouteImport } from './routes/admin.premium'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
+import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
 import { Route as AdminGmailRouteImport } from './routes/admin.gmail'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
+import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 
 const ReferralRoute = ReferralRouteImport.update({
   id: '/referral',
@@ -69,6 +72,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSecurityRoute = AdminSecurityRouteImport.update({
+  id: '/admin/security',
+  path: '/admin/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPremiumRoute = AdminPremiumRouteImport.update({
   id: '/admin/premium',
   path: '/admin/premium',
@@ -77,6 +85,11 @@ const AdminPremiumRoute = AdminPremiumRouteImport.update({
 const AdminOwnerRoute = AdminOwnerRouteImport.update({
   id: '/admin/owner',
   path: '/admin/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMonitoringRoute = AdminMonitoringRouteImport.update({
+  id: '/admin/monitoring',
+  path: '/admin/monitoring',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminGmailRoute = AdminGmailRouteImport.update({
@@ -94,6 +107,11 @@ const AdminBroadcastRoute = AdminBroadcastRouteImport.update({
   path: '/admin/broadcast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBackupRoute = AdminBackupRouteImport.update({
+  id: '/admin/backup',
+  path: '/admin/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -102,11 +120,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/referral': typeof ReferralRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
+  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -118,11 +139,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/referral': typeof ReferralRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
+  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -135,11 +159,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/referral': typeof ReferralRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
+  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -153,11 +180,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/profil'
     | '/referral'
+    | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
+    | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/templates'
     | '/admin/users'
@@ -169,11 +199,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/profil'
     | '/referral'
+    | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
+    | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/templates'
     | '/admin/users'
@@ -185,11 +218,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/profil'
     | '/referral'
+    | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
+    | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/templates'
     | '/admin/users'
@@ -202,11 +238,14 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfilRoute: typeof ProfilRoute
   ReferralRoute: typeof ReferralRoute
+  AdminBackupRoute: typeof AdminBackupRoute
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminGmailRoute: typeof AdminGmailRoute
+  AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
   AdminPremiumRoute: typeof AdminPremiumRoute
+  AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTemplatesRoute: typeof AdminTemplatesRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -277,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/security': {
+      id: '/admin/security'
+      path: '/admin/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminSecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/premium': {
       id: '/admin/premium'
       path: '/admin/premium'
@@ -289,6 +335,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/owner'
       fullPath: '/admin/owner'
       preLoaderRoute: typeof AdminOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/monitoring': {
+      id: '/admin/monitoring'
+      path: '/admin/monitoring'
+      fullPath: '/admin/monitoring'
+      preLoaderRoute: typeof AdminMonitoringRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/gmail': {
@@ -312,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBroadcastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/backup': {
+      id: '/admin/backup'
+      path: '/admin/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AdminBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -322,11 +382,14 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfilRoute: ProfilRoute,
   ReferralRoute: ReferralRoute,
+  AdminBackupRoute: AdminBackupRoute,
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminGmailRoute: AdminGmailRoute,
+  AdminMonitoringRoute: AdminMonitoringRoute,
   AdminOwnerRoute: AdminOwnerRoute,
   AdminPremiumRoute: AdminPremiumRoute,
+  AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTemplatesRoute: AdminTemplatesRoute,
   AdminUsersRoute: AdminUsersRoute,
