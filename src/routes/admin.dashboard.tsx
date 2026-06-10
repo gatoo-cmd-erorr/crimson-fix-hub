@@ -92,6 +92,25 @@ function AdminDashboard() {
           loading={isLoading}
           accent="green"
         />
+        <Link to="/admin/monitoring" className="press">
+          <Stat
+            icon="🚨"
+            label="Akan Expired"
+            v={expiringCount}
+            loading={monStats.isLoading}
+            accent="red"
+          />
+        </Link>
+        <Link to="/admin/security" className="press">
+          <Stat
+            icon="🔒"
+            label="User Diblokir"
+            v={blockedCount}
+            loading={blocked.isLoading}
+            accent="red"
+          />
+        </Link>
+
       </div>
 
       <Card className="mb-3">
