@@ -20,6 +20,7 @@ import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminPremiumRouteImport } from './routes/admin.premium'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
+import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
 import { Route as AdminGmailRouteImport } from './routes/admin.gmail'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
@@ -80,6 +81,11 @@ const AdminOwnerRoute = AdminOwnerRouteImport.update({
   path: '/admin/owner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMonitoringRoute = AdminMonitoringRouteImport.update({
+  id: '/admin/monitoring',
+  path: '/admin/monitoring',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminGmailRoute = AdminGmailRouteImport.update({
   id: '/admin/gmail',
   path: '/admin/gmail',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
+  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
+  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
+  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
+    | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
     | '/admin/settings'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
+    | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
     | '/admin/settings'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
+    | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
     | '/admin/settings'
@@ -218,6 +230,7 @@ export interface RootRouteChildren {
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminGmailRoute: typeof AdminGmailRoute
+  AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
   AdminPremiumRoute: typeof AdminPremiumRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/monitoring': {
+      id: '/admin/monitoring'
+      path: '/admin/monitoring'
+      fullPath: '/admin/monitoring'
+      preLoaderRoute: typeof AdminMonitoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/gmail': {
       id: '/admin/gmail'
       path: '/admin/gmail'
@@ -346,6 +366,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminGmailRoute: AdminGmailRoute,
+  AdminMonitoringRoute: AdminMonitoringRoute,
   AdminOwnerRoute: AdminOwnerRoute,
   AdminPremiumRoute: AdminPremiumRoute,
   AdminSettingsRoute: AdminSettingsRoute,
