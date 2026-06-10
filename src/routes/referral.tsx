@@ -14,27 +14,28 @@ export const Route = createFileRoute("/referral")({
   component: ReferralPage,
 });
 
-interface RefData {
-  link: string;
-  coin_balance: number;
-  total_coins_earned: number;
-  total_coins_spent: number;
-  confirmed_referrals: number;
-  pending_referrals?: number;
-}
-
-interface LeaderRow {
-  user_id: string;
-  username: string;
-  total_coins_earned: number;
-}
-
 interface CoinTx {
   _id: string;
   type: "earn" | "spend";
   amount: number;
   reason: string;
   timestamp: string;
+}
+
+interface RefData {
+  link: string;
+  coin_balance: number;
+  total_coins_earned: number;
+  total_coins_spent: number;
+  confirmed_referrals: number;
+  total_invited: number;
+  recent_transactions: CoinTx[];
+}
+
+interface LeaderRow {
+  user_id: string;
+  username: string;
+  total_coins_earned: number;
 }
 
 const REDEEM_COST = 3;
