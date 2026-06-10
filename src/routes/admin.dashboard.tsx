@@ -194,6 +194,9 @@ export function AdminSubNav() {
     { to: "/admin/gmail", label: "Gmail" },
     { to: "/admin/templates", label: "Template" },
     { to: "/admin/premium", label: "Premium" },
+    { to: "/admin/monitoring", label: "📊 Monitor" },
+    { to: "/admin/security", label: "🛡️ Keamanan" },
+    { to: "/admin/backup", label: "💾 Backup" },
     { to: "/admin/owner", label: "Owner" },
     { to: "/admin/broadcast", label: "Broadcast" },
     { to: "/admin/settings", label: "Settings" },
@@ -214,3 +217,4 @@ export function AdminSubNav() {
     </div>
   );
 }
+
