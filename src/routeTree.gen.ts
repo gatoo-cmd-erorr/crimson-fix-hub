@@ -23,6 +23,7 @@ import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
 import { Route as AdminGmailRouteImport } from './routes/admin.gmail'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
+import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 
 const ReferralRoute = ReferralRouteImport.update({
   id: '/referral',
@@ -94,6 +95,11 @@ const AdminBroadcastRoute = AdminBroadcastRouteImport.update({
   path: '/admin/broadcast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBackupRoute = AdminBackupRouteImport.update({
+  id: '/admin/backup',
+  path: '/admin/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/referral': typeof ReferralRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/referral': typeof ReferralRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/referral': typeof ReferralRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/gmail': typeof AdminGmailRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profil'
     | '/referral'
+    | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profil'
     | '/referral'
+    | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profil'
     | '/referral'
+    | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
     | '/admin/gmail'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfilRoute: typeof ProfilRoute
   ReferralRoute: typeof ReferralRoute
+  AdminBackupRoute: typeof AdminBackupRoute
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminGmailRoute: typeof AdminGmailRoute
@@ -312,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBroadcastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/backup': {
+      id: '/admin/backup'
+      path: '/admin/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AdminBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfilRoute: ProfilRoute,
   ReferralRoute: ReferralRoute,
+  AdminBackupRoute: AdminBackupRoute,
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminGmailRoute: AdminGmailRoute,
