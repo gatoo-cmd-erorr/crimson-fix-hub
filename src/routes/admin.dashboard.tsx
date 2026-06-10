@@ -33,7 +33,22 @@ function AdminDashboard() {
     queryKey: ["admin-dash"],
     queryFn: async () => (await api.get("/admin/dashboard")).data,
   });
+  const monStats = useQuery<{ expiring_h1?: number; expiring_h3?: number }>({
+    queryKey: ["mon-stats"],
+    queryFn: async () => (await api.get("/monitoring/stats")).data,
+  });
+  const blocked = useQuery<any[]>({
+    queryKey: ["sec-blocked"],
+    queryFn: async () => {
+      const r = await api.get("/security/blocked-users");
+      return Array.isArray(r.data) ? r.data : r.data?.users ?? [];
+    },
+  });
+  const expiringCount =
+    (monStats.data?.expiring_h1 ?? 0) + (monStats.data?.expiring_h3 ?? 0);
+  const blockedCount = blocked.data?.length ?? 0;
   const [tog, setTog] = useState(false);
+
 
   const toggleMaint = async (v: boolean) => {
     setTog(true);
