@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminPremiumRouteImport } from './routes/admin.premium'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
 import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
@@ -71,6 +72,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSecurityRoute = AdminSecurityRouteImport.update({
+  id: '/admin/security',
+  path: '/admin/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPremiumRoute = AdminPremiumRouteImport.update({
   id: '/admin/premium',
   path: '/admin/premium',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/templates'
     | '/admin/users'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/templates'
     | '/admin/users'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/templates'
     | '/admin/users'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
   AdminPremiumRoute: typeof AdminPremiumRoute
+  AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTemplatesRoute: typeof AdminTemplatesRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/security': {
+      id: '/admin/security'
+      path: '/admin/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminSecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/premium': {
       id: '/admin/premium'
       path: '/admin/premium'
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminMonitoringRoute: AdminMonitoringRoute,
   AdminOwnerRoute: AdminOwnerRoute,
   AdminPremiumRoute: AdminPremiumRoute,
+  AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTemplatesRoute: AdminTemplatesRoute,
   AdminUsersRoute: AdminUsersRoute,
