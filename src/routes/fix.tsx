@@ -105,11 +105,12 @@ function FixPage() {
         random,
       });
       tgHaptic("success");
+      const r = Array.isArray(data?.results) ? data.results[0] ?? {} : {};
       setResult({
         ok: true,
-        tracking_id: data.tracking_id,
-        sender: data.gmail_sender,
-        ts: data.timestamp_wib,
+        tracking_id: r.tracking_id ?? data.tracking_id ?? "-",
+        sender: r.gmail_sender ?? data.gmail_sender ?? "-",
+        ts: r.timestamp_wib ?? data.timestamp_wib ?? "-",
       });
       setCooldown(Math.floor((data.cooldown_ms ?? 180000) / 1000));
       limits.refetch();

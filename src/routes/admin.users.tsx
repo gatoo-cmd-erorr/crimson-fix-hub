@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
 import { Card, Button, Input, Label, Skeleton, EmptyState } from "@/components/ui-bits";
@@ -31,9 +31,12 @@ function AdminUsers() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [editing, setEditing] = useState<U | null>(null);
   const [creating, setCreating] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const qc = useQueryClient();
 
+  const queryKey = ["admin-users", search, filter] as const;
   const { data, isLoading, refetch } = useQuery<{ items: U[] }>({
-    queryKey: ["admin-users", search, filter],
+    queryKey,
     queryFn: async () =>
       (
         await api.get("/admin/users", {
@@ -41,6 +44,17 @@ function AdminUsers() {
         })
       ).data,
   });
+
+  const onCreated = (item: U) => {
+    qc.setQueryData<{ items: U[] }>(queryKey, (old) => ({
+      items: [item, ...(old?.items ?? []).filter((u) => u._id !== item._id)],
+    }));
+    if (item._id) {
+      setHighlightId(item._id);
+      setTimeout(() => setHighlightId(null), 3000);
+    }
+    refetch();
+  };
 
   const del = async (id: string) => {
     if (!confirm("Hapus user ini?")) return;
@@ -99,7 +113,7 @@ function AdminUsers() {
         <ul className="space-y-2">
           {data.items.map((u) => (
             <li key={u._id}>
-              <Card className="!p-3">
+              <Card className={`!p-3 ${highlightId === u._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(232,25,44,0.55)]" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -153,7 +167,10 @@ function AdminUsers() {
       <UserForm
         open={creating}
         onClose={() => setCreating(false)}
-        onDone={() => refetch()}
+        onDone={(item) => {
+          if (item) onCreated(item);
+          else refetch();
+        }}
       />
       <UserForm
         open={!!editing}
@@ -174,7 +191,7 @@ function UserForm({
   open: boolean;
   onClose: () => void;
   editing?: U | null;
-  onDone: () => void;
+  onDone: (created?: U) => void;
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -204,12 +221,13 @@ function UserForm({
           status: active ? "active" : "inactive",
         });
         toast.success("Tersimpan");
+        onDone();
       } else {
         if (!username || !password) {
           setBusy(false);
           return toast.error("Wajib isi username & password");
         }
-        await api.post("/admin/users/create", {
+        const { data: created } = await api.post("/admin/users/create", {
           username,
           password,
           role,
@@ -217,8 +235,17 @@ function UserForm({
           expiry: expiry || null,
         });
         toast.success("User dibuat");
+        const item: any = created?.item ?? created ?? {};
+        onDone({
+          _id: item._id ?? `tmp-${Date.now()}`,
+          username: item.username ?? username,
+          telegram_id: item.telegram_id ?? tg,
+          role: item.role ?? role,
+          status: item.status ?? "active",
+          total_fix: item.total_fix ?? 0,
+          expiry: item.expiry ?? expiry ?? null,
+        });
       }
-      onDone();
       onClose();
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");

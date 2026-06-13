@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
 import { Card, Button, Input, Label, Skeleton, EmptyState, Switch } from "@/components/ui-bits";
@@ -32,6 +32,7 @@ function AdminPremium() {
   const [busy, setBusy] = useState(false);
   const [gratis, setGratis] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const qc = useQueryClient();
 
   const list = useQuery<{ items: P[] }>({
     queryKey: ["admin-premium"],
@@ -66,9 +67,25 @@ function AdminPremium() {
         days,
       });
       toast.success(`✅ Premium ${days === 0 ? "Permanent" : days + " hari"} ditambahkan`);
-      const newId = created?._id ?? created?.item?._id ?? null;
+      const item: P = created?.item ?? created ?? {};
+      const newId = item?._id ?? null;
+      const expiry =
+        item.expiry ??
+        (days === 0
+          ? null
+          : new Date(Date.now() + days * 86400000).toISOString());
+      const optimistic: P = {
+        _id: newId ?? `tmp-${Date.now()}`,
+        username: item.username,
+        telegram_id: item.telegram_id ?? tg,
+        expiry,
+        status: item.status ?? "active",
+      };
+      qc.setQueryData<{ items: P[] }>(["admin-premium"], (old) => ({
+        items: [optimistic, ...(old?.items ?? []).filter((p) => p._id !== optimistic._id)],
+      }));
       setTg("");
-      await list.refetch();
+      list.refetch();
       if (newId) {
         setHighlightId(newId);
         setTimeout(() => setHighlightId(null), 3000);
