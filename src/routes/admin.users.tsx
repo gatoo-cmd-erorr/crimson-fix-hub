@@ -31,9 +31,12 @@ function AdminUsers() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [editing, setEditing] = useState<U | null>(null);
   const [creating, setCreating] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const qc = useQueryClient();
 
+  const queryKey = ["admin-users", search, filter] as const;
   const { data, isLoading, refetch } = useQuery<{ items: U[] }>({
-    queryKey: ["admin-users", search, filter],
+    queryKey,
     queryFn: async () =>
       (
         await api.get("/admin/users", {
@@ -41,6 +44,17 @@ function AdminUsers() {
         })
       ).data,
   });
+
+  const onCreated = (item: U) => {
+    qc.setQueryData<{ items: U[] }>(queryKey, (old) => ({
+      items: [item, ...(old?.items ?? []).filter((u) => u._id !== item._id)],
+    }));
+    if (item._id) {
+      setHighlightId(item._id);
+      setTimeout(() => setHighlightId(null), 3000);
+    }
+    refetch();
+  };
 
   const del = async (id: string) => {
     if (!confirm("Hapus user ini?")) return;
