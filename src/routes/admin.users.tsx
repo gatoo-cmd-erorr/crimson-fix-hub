@@ -188,7 +188,7 @@ function UserForm({
   open: boolean;
   onClose: () => void;
   editing?: U | null;
-  onDone: () => void;
+  onDone: (created?: U) => void;
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
