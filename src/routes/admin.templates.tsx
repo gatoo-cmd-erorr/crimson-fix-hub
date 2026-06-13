@@ -53,10 +53,22 @@ function AdminTemplates() {
     try {
       const { data: created } = await api.post("/template/add", form);
       toast.success(`✅ Template "${form.name}" tersimpan`);
-      const newId = created?._id ?? created?.item?._id ?? null;
+      const item: T = created?.item ?? created ?? {};
+      const newId = item?._id ?? null;
+      const optimistic: T = {
+        _id: newId ?? `tmp-${Date.now()}`,
+        name: item.name ?? form.name,
+        to_email: item.to_email ?? form.to_email,
+        subject: item.subject ?? form.subject,
+        body: item.body ?? form.body,
+        is_active: item.is_active ?? form.is_active,
+      };
+      qc.setQueryData<{ items: T[] }>(["admin-templates"], (old) => ({
+        items: [optimistic, ...(old?.items ?? []).filter((t) => t._id !== optimistic._id)],
+      }));
       setForm({ name: "", to_email: "", subject: "", body: "", is_active: false });
       setOpen(false);
-      await refetch();
+      refetch();
       if (newId) {
         setHighlightId(newId);
         setTimeout(() => setHighlightId(null), 3000);
