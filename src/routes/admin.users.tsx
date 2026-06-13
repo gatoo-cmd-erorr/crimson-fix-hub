@@ -167,7 +167,7 @@ function AdminUsers() {
       <UserForm
         open={creating}
         onClose={() => setCreating(false)}
-        onDone={() => refetch()}
+        onDone={(item) => (item ? onCreated(item) : refetch())}
       />
       <UserForm
         open={!!editing}
