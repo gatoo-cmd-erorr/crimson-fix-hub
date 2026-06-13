@@ -28,6 +28,7 @@ function AdminGmail() {
   const [busy, setBusy] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [health, setHealth] = useState<Record<string, { ok: boolean; msg: string } | undefined>>({});
+  const qc = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery<{ items: G[] }>({
     queryKey: ["admin-gmail"],
