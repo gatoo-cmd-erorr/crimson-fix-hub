@@ -113,7 +113,7 @@ function AdminUsers() {
         <ul className="space-y-2">
           {data.items.map((u) => (
             <li key={u._id}>
-              <Card className="!p-3">
+              <Card className={`!p-3 ${highlightId === u._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(232,25,44,0.55)]" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
