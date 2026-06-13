@@ -32,6 +32,7 @@ function AdminPremium() {
   const [busy, setBusy] = useState(false);
   const [gratis, setGratis] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const qc = useQueryClient();
 
   const list = useQuery<{ items: P[] }>({
     queryKey: ["admin-premium"],
