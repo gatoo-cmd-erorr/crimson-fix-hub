@@ -44,11 +44,23 @@ function AdminGmail() {
     try {
       const { data: created } = await api.post("/gmail/add", { email, app_password: pw });
       toast.success(`✅ Gmail ${email} ditambahkan`);
-      const newId = created?._id ?? created?.item?._id ?? null;
+      const item: G = created?.item ?? created ?? {};
+      const newId = item?._id ?? null;
+      const optimistic: G = {
+        _id: newId ?? `tmp-${Date.now()}`,
+        email: item.email ?? email,
+        is_active: item.is_active ?? true,
+        status: item.status ?? "ok",
+        total_sent: item.total_sent ?? 0,
+        is_current: item.is_current,
+      };
+      qc.setQueryData<{ items: G[] }>(["admin-gmail"], (old) => ({
+        items: [optimistic, ...(old?.items ?? []).filter((g) => g._id !== optimistic._id)],
+      }));
       setEmail("");
       setPw("");
       setOpen(false);
-      await refetch();
+      refetch();
       if (newId) {
         setHighlightId(newId);
         setTimeout(() => setHighlightId(null), 3000);
