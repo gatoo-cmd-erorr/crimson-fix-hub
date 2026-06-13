@@ -218,12 +218,13 @@ function UserForm({
           status: active ? "active" : "inactive",
         });
         toast.success("Tersimpan");
+        onDone();
       } else {
         if (!username || !password) {
           setBusy(false);
           return toast.error("Wajib isi username & password");
         }
-        await api.post("/admin/users/create", {
+        const { data: created } = await api.post("/admin/users/create", {
           username,
           password,
           role,
@@ -231,8 +232,17 @@ function UserForm({
           expiry: expiry || null,
         });
         toast.success("User dibuat");
+        const item: any = created?.item ?? created ?? {};
+        onDone({
+          _id: item._id ?? `tmp-${Date.now()}`,
+          username: item.username ?? username,
+          telegram_id: item.telegram_id ?? tg,
+          role: item.role ?? role,
+          status: item.status ?? "active",
+          total_fix: item.total_fix ?? 0,
+          expiry: item.expiry ?? expiry ?? null,
+        });
       }
-      onDone();
       onClose();
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
