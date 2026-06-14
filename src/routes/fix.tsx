@@ -207,7 +207,7 @@ function FixPage() {
             <div>
               <Label>Gmail Pengirim</Label>
               <p className="text-xs text-white/55">
-                Dipilih otomatis (round-robin) saat dikirim
+                Gmail dipilih acak otomatis dari pool aktif
               </p>
             </div>
 
