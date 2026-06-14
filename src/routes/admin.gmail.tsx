@@ -32,7 +32,18 @@ function AdminGmail() {
 
   const { data, isLoading, refetch } = useQuery<{ items: G[] }>({
     queryKey: ["admin-gmail"],
-    queryFn: async () => (await api.get("/gmail/list")).data,
+    queryFn: async () => {
+      const { data } = await api.get("/gmail/list");
+      const items: G[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+      return { items };
+    },
+    placeholderData: (prev) => prev,
   });
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
