@@ -37,12 +37,20 @@ function AdminUsers() {
   const queryKey = ["admin-users", search, filter] as const;
   const { data, isLoading, refetch } = useQuery<{ items: U[] }>({
     queryKey,
-    queryFn: async () =>
-      (
-        await api.get("/admin/users", {
-          params: { search: search || undefined, role: filter === "all" ? undefined : filter },
-        })
-      ).data,
+    queryFn: async () => {
+      const { data } = await api.get("/admin/users", {
+        params: { search: search || undefined, role: filter === "all" ? undefined : filter },
+      });
+      const items: U[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+      return { items };
+    },
+    placeholderData: (prev) => prev,
   });
 
   const onCreated = (item: U) => {
