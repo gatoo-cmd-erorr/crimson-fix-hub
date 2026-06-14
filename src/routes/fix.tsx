@@ -106,11 +106,12 @@ function FixPage() {
       });
       tgHaptic("success");
       const r = Array.isArray(data?.results) ? data.results[0] ?? {} : {};
+      const fallbackWIB = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
       setResult({
         ok: true,
         tracking_id: r.tracking_id ?? data.tracking_id ?? "-",
         sender: r.gmail_sender ?? data.gmail_sender ?? "-",
-        ts: r.timestamp_wib ?? data.timestamp_wib ?? "-",
+        ts: r.timestamp_wib ?? data.timestamp_wib ?? fallbackWIB,
       });
       setCooldown(Math.floor((data.cooldown_ms ?? 180000) / 1000));
       limits.refetch();
