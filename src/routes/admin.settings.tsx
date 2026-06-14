@@ -186,7 +186,8 @@ function AdminSettings() {
 
       <MandatoryJoinSection />
 
-
+      {/* spacer so floating Simpan button never overlaps last card content */}
+      <div className="h-32" aria-hidden />
 
       <button
         onClick={save}
