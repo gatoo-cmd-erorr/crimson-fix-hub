@@ -36,7 +36,18 @@ function AdminTemplates() {
 
   const { data, isLoading, refetch } = useQuery<{ items: T[] }>({
     queryKey: ["admin-templates"],
-    queryFn: async () => (await api.get("/template/list")).data,
+    queryFn: async () => {
+      const { data } = await api.get("/template/list");
+      const items: T[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+      return { items };
+    },
+    placeholderData: (prev) => prev,
   });
 
   const SAMPLE_NOMOR = "+628123456789";

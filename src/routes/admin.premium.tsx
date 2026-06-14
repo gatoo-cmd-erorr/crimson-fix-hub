@@ -36,7 +36,18 @@ function AdminPremium() {
 
   const list = useQuery<{ items: P[] }>({
     queryKey: ["admin-premium"],
-    queryFn: async () => (await api.get("/admin/premium")).data,
+    queryFn: async () => {
+      const { data } = await api.get("/admin/premium");
+      const items: P[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+      return { items };
+    },
+    placeholderData: (prev) => prev,
   });
   const settings = useQuery<{ fix_gratis_open: boolean }>({
     queryKey: ["settings-public"],
