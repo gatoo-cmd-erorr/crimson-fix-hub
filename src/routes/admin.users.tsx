@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Card, Button, Input, Label, Skeleton, EmptyState } from "@/components/ui-bits";
 import { BottomSheet } from "@/components/BottomSheet";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -31,45 +31,59 @@ function AdminUsers() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [editing, setEditing] = useState<U | null>(null);
   const [creating, setCreating] = useState(false);
+  const [items, setItems] = useState<U[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
-  const qc = useQueryClient();
 
-  const queryKey = ["admin-users", search, filter] as const;
-  const { data, isLoading, refetch } = useQuery<{ items: U[] }>({
-    queryKey,
-    queryFn: async () => {
+  const fetchList = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!options?.silent) setLoading(true);
+      setError(null);
+      try {
       const { data } = await api.get("/admin/users", {
         params: { search: search || undefined, role: filter === "all" ? undefined : filter },
       });
-      const items: U[] = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.items)
-        ? data.items
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
-      return { items };
+        const nextItems: U[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.users)
+            ? data.users
+            : Array.isArray(data?.items)
+              ? data.items
+              : Array.isArray(data?.data)
+                ? data.data
+                : [];
+        setItems(nextItems);
+      } catch (e: any) {
+        console.error("Failed to fetch User list:", e);
+        setError(e?.response?.data?.message ?? "Gagal memuat daftar user");
+      } finally {
+        if (!options?.silent) setLoading(false);
+      }
     },
-    placeholderData: (prev) => prev,
-  });
+    [filter, search],
+  );
+
+  useEffect(() => {
+    void fetchList();
+  }, [fetchList]);
 
   const onCreated = (item: U) => {
-    qc.setQueryData<{ items: U[] }>(queryKey, (old) => ({
-      items: [item, ...(old?.items ?? []).filter((u) => u._id !== item._id)],
-    }));
+    setItems((prev) => [item, ...prev.filter((u) => u._id !== item._id)]);
     if (item._id) {
       setHighlightId(item._id);
       setTimeout(() => setHighlightId(null), 3000);
     }
-    refetch();
+    void fetchList({ silent: true });
   };
 
   const del = async (id: string) => {
     if (!confirm("Hapus user ini?")) return;
     try {
       await api.delete(`/admin/users/${id}`);
+      setItems((prev) => prev.filter((item) => item._id !== id));
       toast.success("Dihapus");
-      refetch();
+      void fetchList({ silent: true });
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     }
@@ -109,17 +123,29 @@ function AdminUsers() {
         ))}
       </div>
 
-      {isLoading ? (
+      {error && (
+        <Card className="mb-3 flex items-center justify-between gap-3 border-danger/30 bg-danger/10">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-danger">Gagal memuat daftar user</p>
+            <p className="truncate text-xs text-white/65">{error}</p>
+          </div>
+          <Button variant="secondary" className="!h-9 !px-3 !text-xs" onClick={() => void fetchList()}>
+            Retry
+          </Button>
+        </Card>
+      )}
+
+      {loading && !items.length ? (
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-20" />
           ))}
         </div>
-      ) : !data?.items?.length ? (
+      ) : !items.length && !error ? (
         <EmptyState icon="👤" title="Belum ada user" />
       ) : (
         <ul className="space-y-2">
-          {data.items.map((u) => (
+          {items.map((u) => (
             <li key={u._id}>
               <Card className={`!p-3 ${highlightId === u._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(232,25,44,0.55)]" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
@@ -132,8 +158,10 @@ function AdminUsers() {
                       TG {u.telegram_id ?? "-"} · {u.total_fix} fix
                     </p>
                   </div>
-                  <span
-                    className={`h-2 w-2 shrink-0 rounded-full ${u.status === "active" ? "bg-success" : "bg-white/30"}`}
+                  <StatusBadge
+                    status={u.status}
+                    label={u.status === "active" ? "OK" : "ERROR"}
+                    className="shrink-0"
                   />
                 </div>
                 <div className="mt-3 flex gap-2">
@@ -177,14 +205,17 @@ function AdminUsers() {
         onClose={() => setCreating(false)}
         onDone={(item) => {
           if (item) onCreated(item);
-          else refetch();
         }}
       />
       <UserForm
         open={!!editing}
         editing={editing}
         onClose={() => setEditing(null)}
-        onDone={() => refetch()}
+        onDone={(item) => {
+          if (!item) return;
+          setItems((prev) => prev.map((u) => (u._id === item._id ? item : u)));
+          void fetchList({ silent: true });
+        }}
       />
     </>
   );
@@ -209,15 +240,23 @@ function UserForm({
   const [active, setActive] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  useState(() => {
-    if (editing) {
+  useEffect(() => {
+    if (editing && open) {
       setUsername(editing.username);
       setRole(editing.role);
       setTg(editing.telegram_id ?? "");
       setExpiry(editing.expiry?.slice(0, 10) ?? "");
       setActive(editing.status === "active");
+      setPassword("");
+    } else if (open) {
+      setUsername("");
+      setPassword("");
+      setRole("free");
+      setTg("");
+      setExpiry("");
+      setActive(true);
     }
-  });
+  }, [editing, open]);
 
   const submit = async () => {
     setBusy(true);
@@ -229,7 +268,12 @@ function UserForm({
           status: active ? "active" : "inactive",
         });
         toast.success("Tersimpan");
-        onDone();
+        onDone({
+          ...editing,
+          role,
+          expiry: expiry || null,
+          status: active ? "active" : "inactive",
+        });
       } else {
         if (!username || !password) {
           setBusy(false);
@@ -243,7 +287,7 @@ function UserForm({
           expiry: expiry || null,
         });
         toast.success("User dibuat");
-        const item: any = created?.item ?? created ?? {};
+        const item: any = created?.item ?? created?.user ?? created?.data ?? created ?? {};
         onDone({
           _id: item._id ?? `tmp-${Date.now()}`,
           username: item.username ?? username,

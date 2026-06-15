@@ -16,6 +16,7 @@ import { Route as HistoryRouteImport } from './routes/history'
 import { Route as FixRouteImport } from './routes/fix'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminPremiumRouteImport } from './routes/admin.premium'
@@ -59,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTemplatesRoute = AdminTemplatesRouteImport.update({
+  id: '/admin/templates',
+  path: '/admin/templates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/admin/premium': typeof AdminPremiumRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
 }
 export interface FileRoutesByTo {
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/admin/premium': typeof AdminPremiumRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
 }
 export interface FileRoutesById {
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/admin/premium': typeof AdminPremiumRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/users': typeof AdminUsersRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/admin/premium'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/templates'
     | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/admin/premium'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/templates'
     | '/admin/users'
   id:
     | '__root__'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/admin/premium'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/templates'
     | '/admin/users'
   fileRoutesById: FileRoutesById
 }
@@ -235,6 +247,7 @@ export interface RootRouteChildren {
   AdminPremiumRoute: typeof AdminPremiumRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTemplatesRoute: typeof AdminTemplatesRoute
   AdminUsersRoute: typeof AdminUsersRoute
 }
 
@@ -287,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/templates': {
+      id: '/admin/templates'
+      path: '/admin/templates'
+      fullPath: '/admin/templates'
+      preLoaderRoute: typeof AdminTemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/settings': {
@@ -371,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPremiumRoute: AdminPremiumRoute,
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminTemplatesRoute: AdminTemplatesRoute,
   AdminUsersRoute: AdminUsersRoute,
 }
 export const routeTree = rootRouteImport
