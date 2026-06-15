@@ -15,10 +15,14 @@ export interface AuthUser {
   _id: string;
   username: string;
   telegram_id?: string;
+  first_name?: string;
+  last_name?: string;
+  photo_url?: string;
   role: Role;
   created_at?: string;
   total_fix?: number;
   expiry?: string | null;
+  coin_balance?: number;
 }
 
 interface AuthCtx {
@@ -26,18 +30,25 @@ interface AuthCtx {
   token: string | null;
   loading: boolean;
   login: (u: string, p: string) => Promise<void>;
+  loginTelegram: () => Promise<boolean>;
   logout: () => void;
   setUser: (u: AuthUser) => void;
+  tgUser: any;
 }
 
 const Ctx = createContext<AuthCtx | null>(null);
-
 const INACTIVITY_MS = 30 * 60 * 1000;
+
+// Helper: ambil Telegram WebApp object
+function getTg() {
+  return (window as any)?.Telegram?.WebApp ?? null;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tgUser, setTgUser] = useState<any>(null);
   const navigate = useNavigate();
   const { location } = useRouterState();
   const timer = useRef<number | null>(null);
@@ -60,20 +71,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     timer.current = window.setTimeout(() => logout(), INACTIVITY_MS);
   };
 
-  // hydrate
-  useEffect(() => {
-    const t = localStorage.getItem("fm_token");
-    const u = localStorage.getItem("fm_user");
-    if (t && u) {
-      setToken(t);
-      try {
-        setUserState(JSON.parse(u));
-      } catch {}
+  // ── Telegram Auto Login ─────────────────────────────────────────────────────
+  const loginTelegram = async (): Promise<boolean> => {
+    const tg = getTg();
+    if (!tg?.initData || !tg?.initDataUnsafe?.user) return false;
+    
+    const tgU = tg.initDataUnsafe.user;
+    setTgUser(tgU);
+
+    try {
+      const { data } = await api.post("/auth/login-telegram", {
+        init_data: tg.initData,
+        telegram_id: String(tgU.id),
+        first_name: tgU.first_name ?? "",
+        last_name: tgU.last_name ?? "",
+        username: tgU.username ?? "",
+        photo_url: tgU.photo_url ?? "",
+      });
+
+      localStorage.setItem("fm_token", data.token);
+      localStorage.setItem("fm_user", JSON.stringify(data.user));
+      setToken(data.token);
+      setUserState(data.user);
+      return true;
+    } catch {
+      return false;
     }
-    setLoading(false);
+  };
+
+  // ── Hydrate & Auto Login ────────────────────────────────────────────────────
+  useEffect(() => {
+    const init = async () => {
+      // Coba hydrate dari localStorage
+      const t = localStorage.getItem("fm_token");
+      const u = localStorage.getItem("fm_user");
+      if (t && u) {
+        setToken(t);
+        try { setUserState(JSON.parse(u)); } catch {}
+        setLoading(false);
+        return;
+      }
+
+      // Coba auto login via Telegram
+      const tg = getTg();
+      if (tg?.initData) {
+        tg.ready();
+        tg.expand();
+        const ok = await loginTelegram();
+        if (ok) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      setLoading(false);
+    };
+    void init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // guard
+  // ── Route Guard ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (loading) return;
     const path = location.pathname;
@@ -81,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token && path === "/login") navigate({ to: "/" });
   }, [token, loading, location.pathname, navigate]);
 
-  // inactivity
+  // ── Inactivity Logout ───────────────────────────────────────────────────────
   useEffect(() => {
     if (!token) return;
     const handler = () => resetInactivity();
@@ -96,8 +153,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // ── Username/Password Login (fallback) ──────────────────────────────────────
   const login = async (username: string, password: string) => {
-    const tg = (window as any)?.Telegram?.WebApp;
+    const tg = getTg();
     const { data } = await api.post("/auth/login", {
       username,
       password,
@@ -111,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={{ user, token, loading, login, logout, setUser }}>
+    <Ctx.Provider value={{ user, token, loading, login, loginTelegram, logout, setUser, tgUser }}>
       {children}
     </Ctx.Provider>
   );
