@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
 import { Card, Button, Input, Label, Skeleton, EmptyState } from "@/components/ui-bits";
@@ -24,12 +23,37 @@ function AdminOwner() {
   const [tg, setTg] = useState("");
   const [expiry, setExpiry] = useState("");
   const [busy, setBusy] = useState(false);
+  const [items, setItems] = useState<O[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const list = useQuery<{ items: O[] }>({
-    queryKey: ["admin-owners"],
-    queryFn: async () => (await api.get("/admin/owner")).data,
-    enabled: user?.role === "superowner",
-  });
+  const fetchList = useCallback(async (options?: { silent?: boolean }) => {
+    if (user?.role !== "superowner") return;
+    if (!options?.silent) setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.get("/admin/owner");
+      const nextItems: O[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+          ? data.items
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
+      setItems(nextItems);
+    } catch (e: any) {
+      console.error("Failed to fetch Owner list:", e);
+      setError(e?.response?.data?.message ?? "Gagal memuat daftar owner");
+    } finally {
+      if (!options?.silent) setLoading(false);
+    }
+  }, [user?.role]);
+
+  useEffect(() => {
+    if (user?.role === "superowner") {
+      void fetchList();
+    }
+  }, [fetchList, user?.role]);
 
   if (user?.role !== "superowner") {
     return (
@@ -45,11 +69,19 @@ function AdminOwner() {
     if (!tg) return toast.error("Isi Telegram ID");
     setBusy(true);
     try {
-      await api.post("/admin/owner/add", { telegram_id: tg, expiry: expiry || null });
+      const { data: created } = await api.post("/admin/owner/add", { telegram_id: tg, expiry: expiry || null });
       toast.success("Owner ditambahkan");
+      const item: O = created?.item ?? created?.user ?? created?.data ?? created ?? {};
+      const optimistic: O = {
+        _id: item._id ?? `tmp-${Date.now()}`,
+        username: item.username,
+        telegram_id: item.telegram_id ?? tg,
+        expiry: item.expiry ?? expiry ?? null,
+      };
+      setItems((prev) => [optimistic, ...prev.filter((o) => o._id !== optimistic._id)]);
       setTg("");
       setExpiry("");
-      list.refetch();
+      void fetchList({ silent: true });
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
@@ -59,8 +91,16 @@ function AdminOwner() {
 
   const del = async (id: string) => {
     if (!confirm("Hapus owner?")) return;
-    await api.delete(`/admin/owner/${id}`);
-    list.refetch();
+    const previous = items;
+    setItems((prev) => prev.filter((item) => item._id !== id));
+    try {
+      await api.delete(`/admin/owner/${id}`);
+      toast.success("Owner dihapus");
+      void fetchList({ silent: true });
+    } catch (e: any) {
+      setItems(previous);
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
   };
 
   return (
@@ -82,13 +122,25 @@ function AdminOwner() {
         </Button>
       </Card>
 
-      {list.isLoading ? (
+      {error && (
+        <Card className="mb-3 flex items-center justify-between gap-3 border-danger/30 bg-danger/10">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-danger">Gagal memuat daftar owner</p>
+            <p className="truncate text-xs text-white/65">{error}</p>
+          </div>
+          <Button variant="secondary" className="!h-9 !px-3 !text-xs" onClick={() => void fetchList()}>
+            Retry
+          </Button>
+        </Card>
+      )}
+
+      {loading && !items.length ? (
         <Skeleton className="h-24" />
-      ) : !list.data?.items?.length ? (
+      ) : !items.length && !error ? (
         <EmptyState icon="👑" title="Belum ada owner" />
       ) : (
         <ul className="space-y-2">
-          {list.data.items.map((o) => (
+          {items.map((o) => (
             <li key={o._id}>
               <Card className="!p-3 flex items-center justify-between">
                 <div>

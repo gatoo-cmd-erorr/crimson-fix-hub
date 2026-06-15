@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Card, Button, Input, Label, Skeleton, EmptyState } from "@/components/ui-bits";
 import { AdminSubNav } from "./admin.dashboard";
 import { api } from "@/lib/api";
@@ -17,6 +17,8 @@ interface G {
   is_active: boolean;
   status: "ok" | "error";
   total_sent: number;
+  last_used?: string | null;
+  added_by?: string;
   is_current?: boolean;
 }
 
@@ -26,25 +28,36 @@ function AdminGmail() {
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [items, setItems] = useState<G[]>([]);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [health, setHealth] = useState<Record<string, { ok: boolean; msg: string } | undefined>>({});
-  const qc = useQueryClient();
 
-  const { data, isLoading, refetch } = useQuery<{ items: G[] }>({
-    queryKey: ["admin-gmail"],
-    queryFn: async () => {
+  const fetchList = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
+    setError(null);
+    try {
       const { data } = await api.get("/gmail/list");
-      const items: G[] = Array.isArray(data)
+      const nextItems: G[] = Array.isArray(data)
         ? data
         : Array.isArray(data?.items)
-        ? data.items
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
-      return { items };
-    },
-    placeholderData: (prev) => prev,
-  });
+          ? data.items
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
+      setItems(nextItems);
+    } catch (e: any) {
+      console.error("Failed to fetch Gmail list:", e);
+      setError(e?.response?.data?.message ?? "Gagal memuat data Gmail");
+    } finally {
+      if (!options?.silent) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchList();
+  }, [fetchList]);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -56,26 +69,23 @@ function AdminGmail() {
       const { data: created } = await api.post("/gmail/add", { email, app_password: pw });
       toast.success(`✅ Gmail ${email} ditambahkan`);
       const item: G = created?.item ?? created ?? {};
-      const newId = item?._id ?? null;
       const optimistic: G = {
-        _id: newId ?? `tmp-${Date.now()}`,
+        _id: item._id ?? `tmp-${Date.now()}`,
         email: item.email ?? email,
         is_active: item.is_active ?? true,
         status: item.status ?? "ok",
         total_sent: item.total_sent ?? 0,
+        last_used: item.last_used ?? null,
+        added_by: item.added_by,
         is_current: item.is_current,
       };
-      qc.setQueryData<{ items: G[] }>(["admin-gmail"], (old) => ({
-        items: [optimistic, ...(old?.items ?? []).filter((g) => g._id !== optimistic._id)],
-      }));
+      setItems((prev) => [optimistic, ...prev.filter((g) => g._id !== optimistic._id)]);
       setEmail("");
       setPw("");
       setOpen(false);
-      refetch();
-      if (newId) {
-        setHighlightId(newId);
-        setTimeout(() => setHighlightId(null), 3000);
-      }
+      setHighlightId(optimistic._id);
+      setTimeout(() => setHighlightId(null), 3000);
+      void fetchList({ silent: true });
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
@@ -85,8 +95,14 @@ function AdminGmail() {
 
   const del = async (id: string) => {
     if (!confirm("Hapus gmail ini?")) return;
-    await api.delete(`/gmail/${id}`);
-    refetch();
+    try {
+      await api.delete(`/gmail/${id}`);
+      setItems((prev) => prev.filter((item) => item._id !== id));
+      toast.success("Gmail dihapus");
+      void fetchList({ silent: true });
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
   };
 
   const check = async (id: string) => {
@@ -95,7 +111,10 @@ function AdminGmail() {
       const { data } = await api.get(`/gmail/${id}/health`);
       setHealth((h) => ({ ...h, [id]: { ok: !!data.ok, msg: data.message ?? "OK" } }));
     } catch (e: any) {
-      setHealth((h) => ({ ...h, [id]: { ok: false, msg: e?.response?.data?.message ?? "Error" } }));
+      setHealth((h) => ({
+        ...h,
+        [id]: { ok: false, msg: e?.response?.data?.message ?? "Error" },
+      }));
     }
   };
 
@@ -161,16 +180,8 @@ function AdminGmail() {
                   </div>
                   <div>
                     <span className="text-white/40">Status:</span>{" "}
-                    <span
-                      className={
-                        emailValid && pw.length >= 8
-                          ? "text-success"
-                          : "text-warning"
-                      }
-                    >
-                      {emailValid && pw.length >= 8
-                        ? "● Siap disimpan"
-                        : "● Lengkapi data"}
+                    <span className={emailValid && pw.length >= 8 ? "text-success" : "text-warning"}>
+                      {emailValid && pw.length >= 8 ? "● Siap disimpan" : "● Lengkapi data"}
                     </span>
                   </div>
                 </div>
@@ -183,30 +194,42 @@ function AdminGmail() {
         )}
       </Card>
 
-      {isLoading ? (
+      {error && (
+        <Card className="mb-3 flex items-center justify-between gap-3 border-danger/30 bg-danger/10">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-danger">Gagal memuat daftar Gmail</p>
+            <p className="truncate text-xs text-white/65">{error}</p>
+          </div>
+          <Button variant="secondary" className="!h-9 !px-3 !text-xs" onClick={() => void fetchList()}>
+            Retry
+          </Button>
+        </Card>
+      )}
+
+      {loading && !items.length ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-24" />
           ))}
         </div>
-      ) : !data?.items?.length ? (
+      ) : !items.length && !error ? (
         <EmptyState icon="📧" title="Belum ada gmail" hint="Tambahkan gmail pengirim di atas." />
       ) : (
         <ul className="space-y-2">
-          {data.items.map((g) => (
+          {items.map((g) => (
             <li key={g._id}>
               <Card
                 className={`${g.is_current ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]" : ""} ${highlightId === g._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]" : ""}`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{g.email}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                      <span
-                        className={`rounded-full px-2 py-0.5 font-bold ${g.status === "ok" ? "bg-success/15 text-success" : "bg-danger/15 text-danger"}`}
-                      >
-                        {g.status === "ok" ? "✅ OK" : "❌ Error"}
-                      </span>
+                      <StatusBadge status={g.status} label={g.status === "ok" ? "OK" : "Error"} />
+                      <StatusBadge
+                        status={g.is_active ? "ok" : "error"}
+                        label={g.is_active ? "Active" : "Inactive"}
+                      />
                       {g.is_current && (
                         <span className="rounded-full bg-primary/20 px-2 py-0.5 font-bold text-primary">
                           🔄 Aktif Round
@@ -214,6 +237,9 @@ function AdminGmail() {
                       )}
                       <span className="text-white/55">{g.total_sent} sent</span>
                     </div>
+                    <p className="mt-1 text-xs text-white/45">
+                      Last used: {g.last_used ? new Date(g.last_used).toLocaleString("id-ID") : "Belum pernah"}
+                    </p>
                     {health[g._id] && (
                       <div
                         className={`mt-2 rounded-lg px-2 py-1 text-xs ${health[g._id]!.ok ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}
@@ -226,14 +252,14 @@ function AdminGmail() {
                 <div className="mt-3 flex gap-2">
                   <Button
                     variant="secondary"
-                    className="!h-9 !text-xs !px-3"
+                    className="!h-9 !px-3 !text-xs"
                     onClick={() => check(g._id)}
                   >
                     Health Check
                   </Button>
                   <Button
                     variant="danger"
-                    className="!h-9 !text-xs !px-3 ml-auto"
+                    className="ml-auto !h-9 !px-3 !text-xs"
                     onClick={() => del(g._id)}
                   >
                     Hapus

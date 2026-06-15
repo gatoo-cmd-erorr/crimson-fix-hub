@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Card, Button, Input, Label, Skeleton, EmptyState } from "@/components/ui-bits";
 import { AdminSubNav } from "./admin.dashboard";
 import { api } from "@/lib/api";
@@ -30,60 +30,70 @@ function AdminTemplates() {
     is_active: false,
   });
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [items, setItems] = useState<T[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
-  const qc = useQueryClient();
 
-  const { data, isLoading, refetch } = useQuery<{ items: T[] }>({
-    queryKey: ["admin-templates"],
-    queryFn: async () => {
+  const fetchList = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
+    setError(null);
+    try {
       const { data } = await api.get("/template/list");
-      const items: T[] = Array.isArray(data)
+      const nextItems: T[] = Array.isArray(data)
         ? data
         : Array.isArray(data?.items)
-        ? data.items
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
-      return { items };
-    },
-    placeholderData: (prev) => prev,
-  });
+          ? data.items
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
+      setItems(nextItems);
+    } catch (e: any) {
+      console.error("Failed to fetch Template list:", e);
+      setError(e?.response?.data?.message ?? "Gagal memuat template");
+    } finally {
+      if (!options?.silent) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchList();
+  }, [fetchList]);
 
   const SAMPLE_NOMOR = "+628123456789";
-  const preview = useMemo(() => ({
-    subject: form.subject.replaceAll("{nomor}", SAMPLE_NOMOR),
-    to: form.to_email || "(belum diisi)",
-    nomor: SAMPLE_NOMOR,
-  }), [form]);
+  const preview = useMemo(
+    () => ({
+      subject: form.subject.replaceAll("{nomor}", SAMPLE_NOMOR),
+      to: form.to_email || "(belum diisi)",
+      nomor: SAMPLE_NOMOR,
+    }),
+    [form],
+  );
 
   const save = async () => {
-    if (!form.name || !form.subject || !form.body || !form.to_email)
+    if (!form.name || !form.subject || !form.body || !form.to_email) {
       return toast.error("Lengkapi semua field");
+    }
     setBusy(true);
     try {
       const { data: created } = await api.post("/template/add", form);
       toast.success(`✅ Template "${form.name}" tersimpan`);
       const item: T = created?.item ?? created ?? {};
-      const newId = item?._id ?? null;
       const optimistic: T = {
-        _id: newId ?? `tmp-${Date.now()}`,
+        _id: item._id ?? `tmp-${Date.now()}`,
         name: item.name ?? form.name,
         to_email: item.to_email ?? form.to_email,
         subject: item.subject ?? form.subject,
         body: item.body ?? form.body,
         is_active: item.is_active ?? form.is_active,
       };
-      qc.setQueryData<{ items: T[] }>(["admin-templates"], (old) => ({
-        items: [optimistic, ...(old?.items ?? []).filter((t) => t._id !== optimistic._id)],
-      }));
+      setItems((prev) => [optimistic, ...prev.filter((t) => t._id !== optimistic._id)]);
       setForm({ name: "", to_email: "", subject: "", body: "", is_active: false });
       setOpen(false);
-      refetch();
-      if (newId) {
-        setHighlightId(newId);
-        setTimeout(() => setHighlightId(null), 3000);
-      }
+      setHighlightId(optimistic._id);
+      setTimeout(() => setHighlightId(null), 3000);
+      void fetchList({ silent: true });
     } catch (e: any) {
       toast.error(e?.response?.data?.message ?? "Gagal");
     } finally {
@@ -92,14 +102,30 @@ function AdminTemplates() {
   };
 
   const setActive = async (id: string) => {
-    await api.post(`/template/${id}/set-active`);
-    toast.success("Aktif");
-    refetch();
+    const previous = items;
+    setItems((prev) => prev.map((t) => ({ ...t, is_active: t._id === id })));
+    try {
+      await api.post(`/template/${id}/set-active`);
+      toast.success("Aktif");
+      void fetchList({ silent: true });
+    } catch (e: any) {
+      setItems(previous);
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
   };
+
   const del = async (id: string) => {
     if (!confirm("Hapus template?")) return;
-    await api.delete(`/template/${id}`);
-    refetch();
+    const previous = items;
+    setItems((prev) => prev.filter((item) => item._id !== id));
+    try {
+      await api.delete(`/template/${id}`);
+      toast.success("Template dihapus");
+      void fetchList({ silent: true });
+    } catch (e: any) {
+      setItems(previous);
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
   };
 
   return (
@@ -180,28 +206,32 @@ function AdminTemplates() {
         )}
       </Card>
 
-      {isLoading ? (
+      {error && (
+        <Card className="mb-3 flex items-center justify-between gap-3 border-danger/30 bg-danger/10">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-danger">Gagal memuat daftar template</p>
+            <p className="truncate text-xs text-white/65">{error}</p>
+          </div>
+          <Button variant="secondary" className="!h-9 !px-3 !text-xs" onClick={() => void fetchList()}>
+            Retry
+          </Button>
+        </Card>
+      )}
+
+      {loading && !items.length ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-20" />
           ))}
         </div>
-      ) : !data?.items?.length ? (
+      ) : !items.length && !error ? (
         <EmptyState icon="📝" title="Belum ada template" />
       ) : (
         <ul className="space-y-2">
-          {data.items.map((t) => (
+          {items.map((t) => (
             <li key={t._id}>
               <Card
-                className={`${
-                  t.is_active
-                    ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]"
-                    : ""
-                } ${
-                  highlightId === t._id
-                    ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]"
-                    : ""
-                }`}
+                className={`${t.is_active ? "border-primary/50 shadow-[0_0_16px_rgba(10,132,255,0.2)]" : ""} ${highlightId === t._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]" : ""}`}
               >
                 <button
                   onClick={() => setExpanded((e) => (e === t._id ? null : t._id))}
@@ -209,17 +239,16 @@ function AdminTemplates() {
                 >
                   <div className="flex items-center gap-2">
                     <p className="flex-1 truncate font-semibold">{t.name}</p>
-                    {t.is_active && (
-                      <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">
-                        AKTIF
-                      </span>
-                    )}
+                    <StatusBadge
+                      status={t.is_active ? "ok" : "error"}
+                      label={t.is_active ? "OK" : "ERROR"}
+                    />
                   </div>
                   <p className="mt-1 truncate text-xs text-white/55">{t.to_email}</p>
                   <p className="mt-0.5 truncate text-xs text-white/45">{t.subject}</p>
                 </button>
                 {expanded === t._id && (
-                  <div className="mt-3 rounded-lg bg-black/30 p-2 text-xs whitespace-pre-wrap text-white/70">
+                  <div className="mt-3 whitespace-pre-wrap rounded-lg bg-black/30 p-2 text-xs text-white/70">
                     {t.body}
                   </div>
                 )}
@@ -227,7 +256,7 @@ function AdminTemplates() {
                   {!t.is_active && (
                     <Button
                       variant="secondary"
-                      className="!h-9 !text-xs !px-3"
+                      className="!h-9 !px-3 !text-xs"
                       onClick={() => setActive(t._id)}
                     >
                       Set Aktif
@@ -235,7 +264,7 @@ function AdminTemplates() {
                   )}
                   <Button
                     variant="danger"
-                    className="!h-9 !text-xs !px-3 ml-auto"
+                    className="ml-auto !h-9 !px-3 !text-xs"
                     onClick={() => del(t._id)}
                   >
                     Hapus
