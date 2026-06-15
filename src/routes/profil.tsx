@@ -27,22 +27,42 @@ function ProfilPage() {
   });
 
   if (!user) return null;
-  const initials = user.username.slice(0, 2).toUpperCase();
+  const initials = (user.first_name || user.username).slice(0, 2).toUpperCase();
+  const displayName = user.first_name
+    ? `${user.first_name}${user.last_name ? " " + user.last_name : ""}`
+    : user.username;
 
   return (
     <>
       <Header title="Profil Saya" />
 
       <Card className="mb-3 flex flex-col items-center text-center">
-        <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#0A84FF,#0060CC)] text-2xl font-bold">
-          {initials}
-        </div>
-        <h2 className="mt-3 text-xl font-bold">{user.username}</h2>
+        {/* Avatar: foto Telegram atau inisial */}
+        {user.photo_url ? (
+          <img
+            src={user.photo_url}
+            alt={displayName}
+            className="h-[72px] w-[72px] rounded-full object-cover ring-2 ring-primary/40"
+          />
+        ) : (
+          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#0A84FF,#0060CC)] text-2xl font-bold">
+            {initials}
+          </div>
+        )}
+        <h2 className="mt-3 text-xl font-bold">{displayName}</h2>
+        {user.first_name && (
+          <p className="text-sm text-white/45">@{user.username}</p>
+        )}
         <div className="mt-2">
           <RoleBadge role={user.role} />
         </div>
         {user.telegram_id && (
-          <p className="mt-2 text-xs text-white/40">TG: {user.telegram_id}</p>
+          <p className="mt-2 text-xs text-white/40">TG ID: {user.telegram_id}</p>
+        )}
+        {(user as any).coin_balance !== undefined && (
+          <p className="mt-1 text-xs text-white/55">
+            🪙 {(user as any).coin_balance ?? 0} Koin
+          </p>
         )}
       </Card>
 
