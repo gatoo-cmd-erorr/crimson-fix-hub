@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Card, Button, Input, Label, Skeleton, EmptyState, Switch } from "@/components/ui-bits";
 import { AdminSubNav } from "./admin.dashboard";
 import { api } from "@/lib/api";
@@ -31,32 +31,47 @@ function AdminPremium() {
   const [days, setDays] = useState(30);
   const [busy, setBusy] = useState(false);
   const [gratis, setGratis] = useState(false);
+  const [items, setItems] = useState<P[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
-  const qc = useQueryClient();
 
-  const list = useQuery<{ items: P[] }>({
-    queryKey: ["admin-premium"],
-    queryFn: async () => {
+  const fetchList = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
+    setError(null);
+    try {
       const { data } = await api.get("/admin/premium");
-      const items: P[] = Array.isArray(data)
+      const nextItems: P[] = Array.isArray(data)
         ? data
-        : Array.isArray(data?.items)
-        ? data.items
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
-      return { items };
-    },
-    placeholderData: (prev) => prev,
-  });
-  const settings = useQuery<{ fix_gratis_open: boolean }>({
-    queryKey: ["settings-public"],
-    queryFn: async () => {
+        : Array.isArray(data?.users)
+          ? data.users
+          : Array.isArray(data?.items)
+            ? data.items
+            : Array.isArray(data?.data)
+              ? data.data
+              : [];
+      setItems(nextItems);
+    } catch (e: any) {
+      console.error("Failed to fetch Premium list:", e);
+      setError(e?.response?.data?.message ?? "Gagal memuat daftar premium");
+    } finally {
+      if (!options?.silent) setLoading(false);
+    }
+  }, []);
+
+  const fetchSettings = useCallback(async () => {
+    try {
       const { data } = await api.get("/admin/settings");
       setGratis(!!data.fix_gratis_open);
-      return data;
-    },
-  });
+    } catch (e) {
+      console.error("Failed to fetch Premium settings:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchList();
+    void fetchSettings();
+  }, [fetchList, fetchSettings]);
 
   const previewExpiry = useMemo(() => {
     if (days === 0) return "Permanent";
@@ -66,7 +81,7 @@ function AdminPremium() {
       day: "2-digit",
       month: "long",
       year: "numeric",
-    });
+    },
   }, [days]);
 
   const add = async () => {
@@ -92,11 +107,9 @@ function AdminPremium() {
         expiry,
         status: item.status ?? "active",
       };
-      qc.setQueryData<{ items: P[] }>(["admin-premium"], (old) => ({
-        items: [optimistic, ...(old?.items ?? []).filter((p) => p._id !== optimistic._id)],
-      }));
+      setItems((prev) => [optimistic, ...prev.filter((p) => p._id !== optimistic._id)]);
       setTg("");
-      list.refetch();
+      void fetchList({ silent: true });
       if (newId) {
         setHighlightId(newId);
         setTimeout(() => setHighlightId(null), 3000);
@@ -110,8 +123,16 @@ function AdminPremium() {
 
   const del = async (id: string) => {
     if (!confirm("Hapus premium?")) return;
-    await api.delete(`/admin/premium/${id}`);
-    list.refetch();
+    const previous = items;
+    setItems((prev) => prev.filter((item) => item._id !== id));
+    try {
+      await api.delete(`/admin/premium/${id}`);
+      toast.success("Premium dihapus");
+      void fetchList({ silent: true });
+    } catch (e: any) {
+      setItems(previous);
+      toast.error(e?.response?.data?.message ?? "Gagal");
+    }
   };
 
   const toggleGratis = async (v: boolean) => {
@@ -181,13 +202,25 @@ function AdminPremium() {
         </div>
       </Card>
 
-      {list.isLoading ? (
+      {error && (
+        <Card className="mb-3 flex items-center justify-between gap-3 border-danger/30 bg-danger/10">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-danger">Gagal memuat daftar premium</p>
+            <p className="truncate text-xs text-white/65">{error}</p>
+          </div>
+          <Button variant="secondary" className="!h-9 !px-3 !text-xs" onClick={() => void fetchList()}>
+            Retry
+          </Button>
+        </Card>
+      )}
+
+      {loading && !items.length ? (
         <Skeleton className="h-24" />
-      ) : !list.data?.items?.length ? (
+      ) : !items.length && !error ? (
         <EmptyState icon="💎" title="Belum ada premium" />
       ) : (
         <ul className="space-y-2">
-          {list.data.items.map((p) => (
+          {items.map((p) => (
             <li key={p._id}>
               <Card
                 className={`!p-3 ${highlightId === p._id ? "animate-pulse !border-primary shadow-[0_0_28px_rgba(10,132,255,0.55)]" : ""}`}
@@ -195,16 +228,13 @@ function AdminPremium() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold">{p.username ?? p.telegram_id}</p>
-                    <p className="text-xs text-white/55">
-                      {p.expiry ? new Date(p.expiry).toLocaleDateString("id-ID") : "Permanent"} ·{" "}
-                      <span
-                        className={
-                          p.status === "active" ? "text-success" : "text-warning"
-                        }
-                      >
-                        {p.status}
-                      </span>
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/55">
+                      <span>{p.expiry ? new Date(p.expiry).toLocaleDateString("id-ID") : "Permanent"}</span>
+                      <StatusBadge
+                        status={p.status === "active" ? "ok" : "error"}
+                        label={p.status === "active" ? "OK" : "ERROR"}
+                      />
+                    </div>
                   </div>
                   <Button
                     variant="danger"
