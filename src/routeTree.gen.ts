@@ -22,7 +22,6 @@ import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminPremiumRouteImport } from './routes/admin.premium'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
 import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
-import { Route as AdminGmailRouteImport } from './routes/admin.gmail'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
 import { Route as AdminBackupRouteImport } from './routes/admin.backup'
@@ -92,11 +91,6 @@ const AdminMonitoringRoute = AdminMonitoringRouteImport.update({
   path: '/admin/monitoring',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminGmailRoute = AdminGmailRouteImport.update({
-  id: '/admin/gmail',
-  path: '/admin/gmail',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
@@ -123,7 +117,6 @@ export interface FileRoutesByFullPath {
   '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/gmail': typeof AdminGmailRoute
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
@@ -142,7 +135,6 @@ export interface FileRoutesByTo {
   '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/gmail': typeof AdminGmailRoute
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
@@ -162,7 +154,6 @@ export interface FileRoutesById {
   '/admin/backup': typeof AdminBackupRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/gmail': typeof AdminGmailRoute
   '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/owner': typeof AdminOwnerRoute
   '/admin/premium': typeof AdminPremiumRoute
@@ -183,7 +174,6 @@ export interface FileRouteTypes {
     | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
-    | '/admin/gmail'
     | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
@@ -202,7 +192,6 @@ export interface FileRouteTypes {
     | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
-    | '/admin/gmail'
     | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
@@ -221,7 +210,6 @@ export interface FileRouteTypes {
     | '/admin/backup'
     | '/admin/broadcast'
     | '/admin/dashboard'
-    | '/admin/gmail'
     | '/admin/monitoring'
     | '/admin/owner'
     | '/admin/premium'
@@ -241,7 +229,6 @@ export interface RootRouteChildren {
   AdminBackupRoute: typeof AdminBackupRoute
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
-  AdminGmailRoute: typeof AdminGmailRoute
   AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
   AdminPremiumRoute: typeof AdminPremiumRoute
@@ -344,13 +331,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMonitoringRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/gmail': {
-      id: '/admin/gmail'
-      path: '/admin/gmail'
-      fullPath: '/admin/gmail'
-      preLoaderRoute: typeof AdminGmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/admin/dashboard'
@@ -385,7 +365,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBackupRoute: AdminBackupRoute,
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminDashboardRoute: AdminDashboardRoute,
-  AdminGmailRoute: AdminGmailRoute,
   AdminMonitoringRoute: AdminMonitoringRoute,
   AdminOwnerRoute: AdminOwnerRoute,
   AdminPremiumRoute: AdminPremiumRoute,
