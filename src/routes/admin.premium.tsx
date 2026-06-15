@@ -40,7 +40,7 @@ function AdminPremium() {
     if (!options?.silent) setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get("/admin/premium");
+      const { data } = await api.get("/admin/users", { params: { role: "premium" } });
       const nextItems: P[] = Array.isArray(data)
         ? data
         : Array.isArray(data?.users)
@@ -81,7 +81,7 @@ function AdminPremium() {
       day: "2-digit",
       month: "long",
       year: "numeric",
-    },
+    });
   }, [days]);
 
   const add = async () => {
@@ -93,7 +93,7 @@ function AdminPremium() {
         days,
       });
       toast.success(`✅ Premium ${days === 0 ? "Permanent" : days + " hari"} ditambahkan`);
-      const item: P = created?.item ?? created ?? {};
+      const item: P = created?.item ?? created?.user ?? created?.data ?? created ?? {};
       const newId = item?._id ?? null;
       const expiry =
         item.expiry ??
